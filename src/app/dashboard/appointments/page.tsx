@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Check, Globe, Plus, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, Globe, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   addAppointment,
   deleteAppointment,
   getAppointments,
+  updateAppointment,
   updateAppointmentStatus,
 } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
@@ -40,16 +41,20 @@ function dayLabel(date: string) {
   return `${DAY_NAMES[d.getDay()]} ${date}`;
 }
 
+const emptyForm = {
+  clientName: "",
+  clientPhone: "",
+  serviceName: "",
+  date: "",
+  time: "10:00",
+};
+
 export default function AppointmentsPage() {
   const { page, loaded } = useMyPage();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [serviceName, setServiceName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("10:00");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState(emptyForm);
 
   const refresh = useCallback(() => {
     if (page) setAppointments(getAppointments(page.id));
@@ -61,26 +66,52 @@ export default function AppointmentsPage() {
 
   if (!loaded || !page) return null;
 
-  const addManual = () => {
-    if (!clientName.trim() || !date || !time) {
+  const openNew = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (a: Appointment) => {
+    setEditingId(a.id);
+    setForm({
+      clientName: a.clientName,
+      clientPhone: a.clientPhone,
+      serviceName: a.serviceName,
+      date: a.date,
+      time: a.time,
+    });
+    setDialogOpen(true);
+  };
+
+  const save = () => {
+    if (!form.clientName.trim() || !form.date || !form.time) {
       toast.error("املأ اسم الزبون، التاريخ والساعة");
       return;
     }
-    addAppointment({
-      pageId: page.id,
-      clientName: clientName.trim(),
-      clientPhone: clientPhone.trim(),
-      serviceName,
-      date,
-      time,
-      status: "confirmed",
-      source: "manual",
-    });
-    toast.success("تمت إضافة الموعد");
+    if (editingId) {
+      updateAppointment(editingId, {
+        clientName: form.clientName.trim(),
+        clientPhone: form.clientPhone.trim(),
+        serviceName: form.serviceName,
+        date: form.date,
+        time: form.time,
+      });
+      toast.success("تم تعديل الموعد");
+    } else {
+      addAppointment({
+        pageId: page.id,
+        clientName: form.clientName.trim(),
+        clientPhone: form.clientPhone.trim(),
+        serviceName: form.serviceName,
+        date: form.date,
+        time: form.time,
+        status: "confirmed",
+        source: "manual",
+      });
+      toast.success("تمت إضافة الموعد");
+    }
     setDialogOpen(false);
-    setClientName("");
-    setClientPhone("");
-    setDate("");
     refresh();
   };
 
@@ -101,27 +132,31 @@ export default function AppointmentsPage() {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={openNew}>
               <Plus className="h-4 w-4" />
               موعد جديد
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>إضافة موعد يدوياً</DialogTitle>
+              <DialogTitle>{editingId ? "تعديل الموعد" : "إضافة موعد يدوياً"}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4">
               <div className="space-y-2">
                 <Label htmlFor="m-name">اسم الزبون</Label>
-                <Input id="m-name" value={clientName} onChange={(e) => setClientName(e.target.value)} />
+                <Input
+                  id="m-name"
+                  value={form.clientName}
+                  onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="m-phone">رقم الهاتف (اختياري)</Label>
                 <Input
                   id="m-phone"
                   dir="ltr"
-                  value={clientPhone}
-                  onChange={(e) => setClientPhone(e.target.value)}
+                  value={form.clientPhone}
+                  onChange={(e) => setForm((f) => ({ ...f, clientPhone: e.target.value }))}
                 />
               </div>
               {page.services.length > 0 && (
@@ -129,8 +164,8 @@ export default function AppointmentsPage() {
                   <Label htmlFor="m-service">الخدمة</Label>
                   <Select
                     id="m-service"
-                    value={serviceName}
-                    onChange={(e) => setServiceName(e.target.value)}
+                    value={form.serviceName}
+                    onChange={(e) => setForm((f) => ({ ...f, serviceName: e.target.value }))}
                   >
                     <option value="">— بدون تحديد —</option>
                     {page.services.map((s) => (
@@ -148,8 +183,8 @@ export default function AppointmentsPage() {
                     id="m-date"
                     type="date"
                     dir="ltr"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    value={form.date}
+                    onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
@@ -159,14 +194,14 @@ export default function AppointmentsPage() {
                     type="time"
                     step={3600}
                     dir="ltr"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
+                    value={form.time}
+                    onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
                   />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={addManual}>إضافة الموعد</Button>
+              <Button onClick={save}>{editingId ? "حفظ التعديلات" : "إضافة الموعد"}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -216,6 +251,14 @@ export default function AppointmentsPage() {
                       {statusConfig[a.status].label}
                     </Badge>
                     <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="تعديل"
+                        onClick={() => openEdit(a)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       {a.status === "pending" && (
                         <Button
                           variant="ghost"

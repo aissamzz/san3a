@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, Plus, ReceiptText, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteInvoice, formatDZD, getInvoices, invoiceTotal } from "@/lib/store";
@@ -88,6 +88,11 @@ export default function InvoicesPage() {
                       <Button variant="ghost" size="icon" aria-label="عرض" asChild>
                         <Link href={`/dashboard/invoices/${invoice.id}`}>
                           <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" aria-label="تعديل" asChild>
+                        <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+                          <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <Button

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Printer } from "lucide-react";
+import { ArrowRight, Pencil, Printer } from "lucide-react";
 
 import { formatDZD, getInvoice, invoiceTotal } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
@@ -43,10 +43,18 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             العودة للفواتير
           </Link>
         </Button>
-        <Button onClick={() => window.print()}>
-          <Printer className="h-4 w-4" />
-          طباعة / تحميل PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+              <Pencil className="h-4 w-4" />
+              تعديل
+            </Link>
+          </Button>
+          <Button onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            طباعة / تحميل PDF
+          </Button>
+        </div>
       </div>
 
       <Card className="print-area">

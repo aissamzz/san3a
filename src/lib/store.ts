@@ -202,6 +202,15 @@ export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
   }
 }
 
+export function updateAppointment(id: string, data: Partial<Omit<Appointment, "id" | "pageId" | "createdAt">>) {
+  const db = loadDb();
+  const a = db.appointments.find((x) => x.id === id);
+  if (a) {
+    Object.assign(a, data);
+    saveDb(db);
+  }
+}
+
 export function deleteAppointment(id: string) {
   const db = loadDb();
   db.appointments = db.appointments.filter((a) => a.id !== id);
@@ -250,6 +259,16 @@ export function addInvoice(
   db.invoices.push(invoice);
   saveDb(db);
   return invoice;
+}
+
+export function updateInvoice(id: string, data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "items">>) {
+  const db = loadDb();
+  const invoice = db.invoices.find((i) => i.id === id);
+  if (invoice) {
+    Object.assign(invoice, data);
+    saveDb(db);
+  }
+  return invoice ?? null;
 }
 
 export function deleteInvoice(id: string) {

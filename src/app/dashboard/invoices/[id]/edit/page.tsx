@@ -1,0 +1,87 @@
+"use client";
+
+import { use, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ReceiptText } from "lucide-react";
+import { toast } from "sonner";
+
+import { getInvoice, updateInvoice } from "@/lib/store";
+import { useMyPage } from "@/lib/use-my-page";
+import { Button } from "@/components/ui/button";
+import { InvoiceForm, type InvoiceFormValue } from "@/components/invoice-form";
+
+export default function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+  const { page, loaded } = useMyPage();
+  const [form, setForm] = useState<InvoiceFormValue | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    const invoice = getInvoice(id);
+    if (!invoice) {
+      setNotFound(true);
+      return;
+    }
+    setForm({
+      clientName: invoice.clientName,
+      clientPhone: invoice.clientPhone,
+      items: invoice.items,
+    });
+  }, [id]);
+
+  if (!loaded || !page) return null;
+
+  if (notFound) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4 text-center">
+        <p className="text-muted-foreground">الفاتورة غير موجودة</p>
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/invoices">العودة للفواتير</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (!form) return null;
+
+  const save = () => {
+    if (!form.clientName.trim()) {
+      toast.error("أدخل اسم الزبون");
+      return;
+    }
+    const validItems = form.items.filter((item) => item.description.trim());
+    if (validItems.length === 0) {
+      toast.error("أضف على الأقل خدمة أو منتج واحد");
+      return;
+    }
+    updateInvoice(id, {
+      clientName: form.clientName.trim(),
+      clientPhone: form.clientPhone.trim(),
+      items: validItems,
+    });
+    toast.success("تم حفظ التعديلات");
+    router.push(`/dashboard/invoices/${id}`);
+  };
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div>
+        <h1 className="flex items-center gap-2 text-2xl font-extrabold">
+          <ReceiptText className="h-6 w-6 text-primary" />
+          تعديل الفاتورة
+        </h1>
+      </div>
+
+      <InvoiceForm value={form} onChange={setForm} />
+
+      <div className="flex justify-end gap-2 pb-6">
+        <Button variant="outline" onClick={() => router.back()}>
+          إلغاء
+        </Button>
+        <Button onClick={save}>حفظ التعديلات</Button>
+      </div>
+    </div>
+  );
+}
