@@ -1,0 +1,310 @@
+import type { Database, WeeklyHours } from "./types";
+
+// 0 = Sunday ... 5 = Friday (weekend) ... 6 = Saturday
+const standardHours: WeeklyHours = {
+  0: { enabled: true, from: "09:00", to: "17:00" },
+  1: { enabled: true, from: "09:00", to: "17:00" },
+  2: { enabled: true, from: "09:00", to: "17:00" },
+  3: { enabled: true, from: "09:00", to: "17:00" },
+  4: { enabled: true, from: "09:00", to: "17:00" },
+  5: { enabled: false, from: "09:00", to: "17:00" },
+  6: { enabled: true, from: "09:00", to: "14:00" },
+};
+
+function img(seed: string) {
+  return `https://picsum.photos/seed/${seed}/800/600`;
+}
+
+function isoDaysFromNow(days: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export function buildSeed(): Database {
+  const now = new Date().toISOString();
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+
+  return {
+    profiles: [
+      {
+        id: "u-demo",
+        email: "demo@san3apages.com",
+        password: "demo1234",
+        name: "محمد بن عمر",
+        role: "user",
+        createdAt: now,
+      },
+      {
+        id: "u-karim",
+        email: "karim@example.com",
+        password: "demo1234",
+        name: "كريم حمادي",
+        role: "user",
+        createdAt: now,
+      },
+      {
+        id: "u-sara",
+        email: "sara@example.com",
+        password: "demo1234",
+        name: "سارة بوزيد",
+        role: "user",
+        createdAt: now,
+      },
+      {
+        id: "u-amine",
+        email: "amine@example.com",
+        password: "demo1234",
+        name: "أمين شريف",
+        role: "user",
+        createdAt: now,
+      },
+      {
+        id: "u-admin",
+        email: "admin@san3apages.com",
+        password: "admin1234",
+        name: "مسؤول المنصة",
+        role: "admin",
+        createdAt: now,
+      },
+    ],
+    pages: [
+      {
+        id: "p-najjar",
+        userId: "u-demo",
+        slug: "najjar-mohamed",
+        businessName: "ورشة النجار محمد",
+        craft: "نجّار",
+        city: "الجزائر",
+        description:
+          "نجّار محترف بخبرة تفوق 15 سنة في صناعة الأثاث على المقاس: مطابخ، غرف نوم، أبواب وديكورات خشبية. جودة عالية وتسليم في الوقت.",
+        phone: "0550123456",
+        whatsapp: "213550123456",
+        avatarUrl: img("najjar-avatar"),
+        coverUrl: img("najjar-cover"),
+        services: [
+          { id: "s1", name: "مطبخ كامل على المقاس", startingPrice: 180000 },
+          { id: "s2", name: "غرفة نوم", startingPrice: 250000 },
+          { id: "s3", name: "باب خشبي", startingPrice: 25000 },
+          { id: "s4", name: "مكتبة / رفوف", startingPrice: 30000 },
+        ],
+        gallery: [
+          { id: "g1", url: img("najjar-1") },
+          { id: "g2", url: img("najjar-2") },
+          { id: "g3", url: img("najjar-3") },
+          { id: "g4", url: img("najjar-4") },
+          { id: "g5", url: img("najjar-5") },
+          { id: "g6", url: img("najjar-6") },
+        ],
+        hours: standardHours,
+        activated: true,
+        activatedUntil: nextYear.toISOString().slice(0, 10),
+        suspended: false,
+        createdAt: now,
+      },
+      {
+        id: "p-dahane",
+        userId: "u-karim",
+        slug: "dahane-karim",
+        businessName: "دهان وديكور كريم",
+        craft: "دهّان",
+        city: "وهران",
+        description:
+          "أعمال الدهن والديكور الداخلي والخارجي: دهن عادي، ديكورات حديثة، ورق جدران. معاينة مجانية وأسعار تنافسية.",
+        phone: "0661234567",
+        whatsapp: "213661234567",
+        avatarUrl: img("dahane-avatar"),
+        coverUrl: img("dahane-cover"),
+        services: [
+          { id: "s1", name: "دهن شقة F3", startingPrice: 60000 },
+          { id: "s2", name: "ديكور جبس", startingPrice: 15000 },
+          { id: "s3", name: "ورق جدران (للغرفة)", startingPrice: 12000 },
+        ],
+        gallery: [
+          { id: "g1", url: img("dahane-1") },
+          { id: "g2", url: img("dahane-2") },
+          { id: "g3", url: img("dahane-3") },
+          { id: "g4", url: img("dahane-4") },
+        ],
+        hours: standardHours,
+        activated: true,
+        activatedUntil: nextYear.toISOString().slice(0, 10),
+        suspended: false,
+        createdAt: now,
+      },
+      {
+        id: "p-halawiyat",
+        userId: "u-sara",
+        slug: "halawiyat-sara",
+        businessName: "حلويات سارة",
+        craft: "صانعة حلويات",
+        city: "قسنطينة",
+        description:
+          "حلويات تقليدية وعصرية للأعراس والمناسبات: قاطو، حلويات اللوز، طورطات على الطلب. مكونات طبيعية ونظافة تامة.",
+        phone: "0770345678",
+        whatsapp: "213770345678",
+        avatarUrl: img("halawiyat-avatar"),
+        coverUrl: img("halawiyat-cover"),
+        services: [
+          { id: "s1", name: "طورطة عيد ميلاد", startingPrice: 4500 },
+          { id: "s2", name: "حلويات اللوز (العلبة)", startingPrice: 3000 },
+          { id: "s3", name: "قاطو الأعراس (100 قطعة)", startingPrice: 18000 },
+        ],
+        gallery: [
+          { id: "g1", url: img("halawiyat-1") },
+          { id: "g2", url: img("halawiyat-2") },
+          { id: "g3", url: img("halawiyat-3") },
+          { id: "g4", url: img("halawiyat-4") },
+          { id: "g5", url: img("halawiyat-5") },
+        ],
+        hours: standardHours,
+        activated: true,
+        activatedUntil: nextYear.toISOString().slice(0, 10),
+        suspended: false,
+        createdAt: now,
+      },
+      {
+        id: "p-photo",
+        userId: "u-amine",
+        slug: "photo-amine",
+        businessName: "استوديو أمين للتصوير",
+        craft: "مصوّر",
+        city: "عنابة",
+        description:
+          "تصوير احترافي للأعراس والمناسبات والمنتجات. تصوير فوتوغرافي وفيديو بأحدث المعدات مع مونتاج احترافي.",
+        phone: "0540456789",
+        whatsapp: "213540456789",
+        avatarUrl: img("photo-avatar"),
+        coverUrl: img("photo-cover"),
+        services: [
+          { id: "s1", name: "تغطية عرس كاملة", startingPrice: 50000 },
+          { id: "s2", name: "جلسة تصوير شخصية", startingPrice: 8000 },
+          { id: "s3", name: "تصوير منتجات (10 صور)", startingPrice: 6000 },
+        ],
+        gallery: [
+          { id: "g1", url: img("photo-1") },
+          { id: "g2", url: img("photo-2") },
+          { id: "g3", url: img("photo-3") },
+          { id: "g4", url: img("photo-4") },
+        ],
+        hours: standardHours,
+        activated: false,
+        activatedUntil: null,
+        suspended: false,
+        createdAt: now,
+      },
+    ],
+    appointments: [
+      {
+        id: "a1",
+        pageId: "p-najjar",
+        clientName: "رشيد بوقرة",
+        clientPhone: "0555111222",
+        serviceName: "مطبخ كامل على المقاس",
+        date: isoDaysFromNow(1),
+        time: "10:00",
+        status: "confirmed",
+        source: "web",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "a2",
+        pageId: "p-najjar",
+        clientName: "فاطمة زهراء",
+        clientPhone: "0666333444",
+        serviceName: "باب خشبي",
+        date: isoDaysFromNow(2),
+        time: "14:00",
+        status: "pending",
+        source: "web",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "a3",
+        pageId: "p-najjar",
+        clientName: "عمي صالح (جار الورشة)",
+        clientPhone: "0777555666",
+        serviceName: "مكتبة / رفوف",
+        date: isoDaysFromNow(4),
+        time: "09:00",
+        status: "confirmed",
+        source: "manual",
+        createdAt: new Date().toISOString(),
+      },
+    ],
+    invoices: [
+      {
+        id: "inv1",
+        pageId: "p-najjar",
+        number: "INV-2026-001",
+        clientName: "شركة الأمل للعقار",
+        clientPhone: "0555000111",
+        items: [
+          { id: "i1", description: "مطبخ على المقاس - خشب MDF", qty: 1, price: 220000 },
+          { id: "i2", description: "تركيب وتوصيل", qty: 1, price: 15000 },
+        ],
+        date: new Date().toISOString(),
+      },
+      {
+        id: "inv2",
+        pageId: "p-najjar",
+        number: "INV-2026-002",
+        clientName: "سمير حاج",
+        clientPhone: "0661222333",
+        items: [{ id: "i1", description: "باب خشب أحمر", qty: 3, price: 28000 }],
+        date: new Date().toISOString(),
+      },
+    ],
+    keys: [
+      {
+        id: "k1",
+        code: "SP-A1B2-C3D4-E5F6",
+        status: "used",
+        usedByPageId: "p-najjar",
+        usedAt: now,
+        createdAt: now,
+      },
+      {
+        id: "k2",
+        code: "SP-G7H8-J9K1-L2M3",
+        status: "used",
+        usedByPageId: "p-dahane",
+        usedAt: now,
+        createdAt: now,
+      },
+      {
+        id: "k3",
+        code: "SP-N4P5-Q6R7-S8T9",
+        status: "used",
+        usedByPageId: "p-halawiyat",
+        usedAt: now,
+        createdAt: now,
+      },
+      {
+        id: "k4",
+        code: "SP-U1V2-W3X4-Y5Z6",
+        status: "unused",
+        usedByPageId: null,
+        usedAt: null,
+        createdAt: now,
+      },
+      {
+        id: "k5",
+        code: "SP-2026-DEMO-0001",
+        status: "unused",
+        usedByPageId: null,
+        usedAt: null,
+        createdAt: now,
+      },
+      {
+        id: "k6",
+        code: "SP-2026-DEMO-0002",
+        status: "unused",
+        usedByPageId: null,
+        usedAt: null,
+        createdAt: now,
+      },
+    ],
+  };
+}
