@@ -33,7 +33,7 @@ export default function LoginPage() {
       <Link href="/" className="mb-6 flex items-center gap-2">
         <Hammer className="h-7 w-7 text-primary" />
         <span className="text-2xl font-extrabold">
-          صنعة<span className="text-primary">بيدجز</span>
+          صنعة
         </span>
       </Link>
       <Card className="w-full max-w-md">
@@ -101,7 +101,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            ما عندكش حساب؟{" "}
+            ليس لديك حساب؟{" "}
             <Link href="/signup" className="font-bold text-primary hover:underline">
               سجّل مجاناً
             </Link>

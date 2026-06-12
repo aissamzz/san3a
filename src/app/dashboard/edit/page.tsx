@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, ImagePlus, Plus, Save, Trash2 } from "lucide-react";
+import { ExternalLink, Hammer, ImagePlus, Plus, Save, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { compressImage } from "@/lib/image";
 import { uid, updatePage } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import { WILAYAS } from "@/lib/wilayas";
@@ -22,6 +23,8 @@ export default function EditPage() {
   const { page, loaded } = useMyPage();
   const [draft, setDraft] = useState<Page | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (page) setDraft(structuredClone(page));
@@ -46,27 +49,41 @@ export default function EditPage() {
     else toast.error(result.message);
   };
 
-  const addGalleryFiles = (files: FileList | null) => {
+  const addGalleryFiles = async (files: FileList | null) => {
     if (!files) return;
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
+    try {
+      for (const file of Array.from(files)) {
+        const url = await compressImage(file);
         setDraft((d) =>
-          d
-            ? { ...d, gallery: [...d.gallery, { id: uid(), url: String(reader.result) }] }
-            : d
+          d ? { ...d, gallery: [...d.gallery, { id: uid(), url }] } : d
         );
-      };
-      reader.readAsDataURL(file);
-    });
+      }
+    } catch {
+      toast.error("تعذّر قراءة الصورة، جرّب صورة أخرى");
+    }
+  };
+
+  const uploadImage = async (
+    files: FileList | null,
+    key: "avatarUrl" | "coverUrl",
+    maxSize: number
+  ) => {
+    const file = files?.[0];
+    if (!file) return;
+    try {
+      const url = await compressImage(file, maxSize);
+      set(key, url);
+    } catch {
+      toast.error("تعذّر قراءة الصورة، جرّب صورة أخرى");
+    }
   };
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold">تعديل الصفحة</h1>
-          <p className="text-muted-foreground">هكذا يراك زبائنك — اجعلها مميزة</p>
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold sm:text-2xl">تعديل الصفحة</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">هكذا يراك زبائنك — اجعلها مميزة</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
@@ -158,24 +175,101 @@ export default function EditPage() {
               onChange={(e) => set("whatsapp", e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="avatarUrl">رابط صورة الملف الشخصي</Label>
-            <Input
-              id="avatarUrl"
-              dir="ltr"
-              placeholder="https://..."
-              value={draft.avatarUrl}
-              onChange={(e) => set("avatarUrl", e.target.value)}
+        </CardContent>
+      </Card>
+
+      {/* Page images */}
+      <Card>
+        <CardHeader>
+          <CardTitle>صور الصفحة</CardTitle>
+          <CardDescription>شعار نشاطك وصورة الغلاف التي تظهر أعلى صفحتك</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Avatar / logo */}
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border bg-muted">
+              {draft.avatarUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={draft.avatarUrl} alt="شعار النشاط" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                  <Hammer className="h-8 w-8" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 space-y-2">
+              <Label>الشعار / الصورة الشخصية</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+                  <Upload className="h-4 w-4" />
+                  {draft.avatarUrl ? "تغيير الصورة" : "رفع صورة"}
+                </Button>
+                {draft.avatarUrl && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive"
+                    onClick={() => set("avatarUrl", "")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    حذف
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">يُفضَّل صورة مربعة بحجم 400×400 أو أكبر</p>
+            </div>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                uploadImage(e.target.files, "avatarUrl", 600);
+                e.target.value = "";
+              }}
             />
           </div>
+
+          {/* Cover */}
           <div className="space-y-2">
-            <Label htmlFor="coverUrl">رابط صورة الغلاف</Label>
-            <Input
-              id="coverUrl"
-              dir="ltr"
-              placeholder="https://..."
-              value={draft.coverUrl}
-              onChange={(e) => set("coverUrl", e.target.value)}
+            <Label>صورة الغلاف</Label>
+            <div className="relative aspect-[3/1] w-full overflow-hidden rounded-xl border bg-muted">
+              {draft.coverUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={draft.coverUrl} alt="صورة الغلاف" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
+                  لا توجد صورة غلاف
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => coverInputRef.current?.click()}>
+                <Upload className="h-4 w-4" />
+                {draft.coverUrl ? "تغيير الغلاف" : "رفع صورة غلاف"}
+              </Button>
+              {draft.coverUrl && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => set("coverUrl", "")}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  حذف
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">يُفضَّل صورة عرضية بحجم 1200×400 أو أكبر</p>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                uploadImage(e.target.files, "coverUrl", 1600);
+                e.target.value = "";
+              }}
             />
           </div>
         </CardContent>
@@ -206,9 +300,9 @@ export default function EditPage() {
             </p>
           )}
           {draft.services.map((service, i) => (
-            <div key={service.id} className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
-                {i === 0 && <Label>اسم الخدمة</Label>}
+            <div key={service.id} className="flex flex-wrap items-end gap-2">
+              <div className="w-full min-w-0 space-y-1 sm:w-auto sm:flex-1">
+                <Label className="text-xs text-muted-foreground">اسم الخدمة {i + 1}</Label>
                 <Input
                   placeholder="مثال: مطبخ على المقاس"
                   value={service.name}
@@ -222,8 +316,8 @@ export default function EditPage() {
                   }
                 />
               </div>
-              <div className="w-36 space-y-1">
-                {i === 0 && <Label>السعر (دج)</Label>}
+              <div className="min-w-0 flex-1 space-y-1 sm:flex-none sm:basis-36">
+                <Label className="text-xs text-muted-foreground">السعر يبدأ من (دج)</Label>
                 <Input
                   type="number"
                   dir="ltr"
@@ -244,7 +338,7 @@ export default function EditPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive"
+                className="shrink-0 text-destructive"
                 aria-label="حذف الخدمة"
                 onClick={() =>
                   set("services", draft.services.filter((s) => s.id !== service.id))

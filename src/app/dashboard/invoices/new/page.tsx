@@ -31,6 +31,10 @@ export default function NewInvoicePage() {
       pageId: page.id,
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
+      clientAddress: form.clientAddress.trim(),
+      date: form.date,
+      status: form.status,
+      notes: form.notes.trim(),
       items: validItems,
     });
     toast.success("تم إنشاء الفاتورة");
@@ -38,9 +42,9 @@ export default function NewInvoicePage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold">
+        <h1 className="flex items-center gap-2 text-xl font-extrabold sm:text-2xl">
           <ReceiptText className="h-6 w-6 text-primary" />
           فاتورة جديدة
         </h1>

@@ -240,11 +240,14 @@ export function buildSeed(): Database {
         number: "INV-2026-001",
         clientName: "شركة الأمل للعقار",
         clientPhone: "0555000111",
+        clientAddress: "حي 5 جويلية، باب الزوار، الجزائر",
         items: [
           { id: "i1", description: "مطبخ على المقاس - خشب MDF", qty: 1, price: 220000 },
           { id: "i2", description: "تركيب وتوصيل", qty: 1, price: 15000 },
         ],
-        date: new Date().toISOString(),
+        date: new Date().toISOString().slice(0, 10),
+        status: "paid",
+        notes: "تم التسليم والتركيب بتاريخ الفاتورة. ضمان سنة على التركيب.",
       },
       {
         id: "inv2",
@@ -252,8 +255,11 @@ export function buildSeed(): Database {
         number: "INV-2026-002",
         clientName: "سمير حاج",
         clientPhone: "0661222333",
+        clientAddress: "",
         items: [{ id: "i1", description: "باب خشب أحمر", qty: 3, price: 28000 }],
-        date: new Date().toISOString(),
+        date: new Date().toISOString().slice(0, 10),
+        status: "unpaid",
+        notes: "",
       },
     ],
     keys: [

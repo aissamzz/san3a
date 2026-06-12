@@ -77,14 +77,19 @@ export interface InvoiceItem {
   price: number; // DZD per unit
 }
 
+export type InvoiceStatus = "paid" | "unpaid";
+
 export interface Invoice {
   id: string;
   pageId: string;
   number: string; // INV-2026-001
   clientName: string;
   clientPhone: string;
+  clientAddress: string;
   items: InvoiceItem[];
-  date: string; // ISO
+  date: string; // "YYYY-MM-DD"
+  status: InvoiceStatus;
+  notes: string;
 }
 
 export type KeyStatus = "unused" | "used";

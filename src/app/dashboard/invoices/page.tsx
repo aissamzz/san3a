@@ -2,22 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
+import { CheckCircle2, Eye, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteInvoice, formatDZD, getInvoices, invoiceTotal } from "@/lib/store";
+import { deleteInvoice, formatDZD, getInvoices, invoiceTotal, updateInvoice } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import type { Invoice } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 export default function InvoicesPage() {
   const { page, loaded } = useMyPage();
@@ -34,11 +27,13 @@ export default function InvoicesPage() {
   if (!loaded || !page) return null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold">الفواتير</h1>
-          <p className="text-muted-foreground">أنشئ فواتير احترافية واطبعها أو حمّلها PDF</p>
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold sm:text-2xl">الفواتير</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            أنشئ فواتير احترافية واطبعها أو حمّلها PDF
+          </p>
         </div>
         <Button asChild>
           <Link href="/dashboard/invoices/new">
@@ -52,69 +47,84 @@ export default function InvoicesPage() {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <ReceiptText className="h-10 w-10 text-muted-foreground" />
-            <p className="font-semibold">لا توجد فواتير بعد</p>
+            <p className="font-bold">لا توجد فواتير بعد</p>
             <Button variant="outline" asChild>
               <Link href="/dashboard/invoices/new">أنشئ أول فاتورة</Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>الرقم</TableHead>
-                <TableHead>الزبون</TableHead>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead className="text-end">إجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell dir="ltr" className="font-mono text-xs">
-                    {invoice.number}
-                  </TableCell>
-                  <TableCell className="font-semibold">{invoice.clientName}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {invoice.date.slice(0, 10)}
-                  </TableCell>
-                  <TableCell className="font-bold text-primary">
-                    {formatDZD(invoiceTotal(invoice.items))}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" aria-label="عرض" asChild>
-                        <Link href={`/dashboard/invoices/${invoice.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="icon" aria-label="تعديل" asChild>
-                        <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        aria-label="حذف"
-                        onClick={() => {
-                          deleteInvoice(invoice.id);
-                          refresh();
-                          toast.success("تم حذف الفاتورة");
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+        <div className="space-y-3">
+          {invoices.map((invoice) => (
+            <Card key={invoice.id}>
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="truncate font-bold">{invoice.clientName}</span>
+                      {invoice.status === "paid" ? (
+                        <Badge variant="success" className="shrink-0">مدفوعة</Badge>
+                      ) : (
+                        <Badge variant="warning" className="shrink-0">غير مدفوعة</Badge>
+                      )}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      <span dir="ltr">{invoice.number}</span> • {invoice.date.slice(0, 10)}
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-end">
+                    <div className="text-lg font-extrabold text-primary">
+                      {formatDZD(invoiceTotal(invoice.items))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t pt-3">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/dashboard/invoices/${invoice.id}`}>
+                      <Eye className="h-4 w-4" />
+                      عرض
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                      تعديل
+                    </Link>
+                  </Button>
+                  {invoice.status === "unpaid" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-green-700"
+                      onClick={() => {
+                        updateInvoice(invoice.id, { status: "paid" });
+                        refresh();
+                        toast.success("تم تسجيل الفاتورة كمدفوعة");
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      تسجيل كمدفوعة
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ms-auto text-destructive"
+                    onClick={() => {
+                      deleteInvoice(invoice.id);
+                      refresh();
+                      toast.success("تم حذف الفاتورة");
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    حذف
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );

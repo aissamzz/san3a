@@ -16,7 +16,8 @@ import type {
   WeeklyHours,
 } from "./types";
 
-const DB_KEY = "san3a_db_v1";
+// Bump the version when the seed shape changes — old browser data is discarded.
+const DB_KEY = "san3a_db_v2";
 const SESSION_KEY = "san3a_session_v1";
 
 export function uid() {
@@ -247,21 +248,23 @@ export function nextInvoiceNumber(pageId: string): string {
 }
 
 export function addInvoice(
-  data: Omit<Invoice, "id" | "date" | "number"> & { number?: string }
+  data: Omit<Invoice, "id" | "number"> & { number?: string }
 ): Invoice {
   const db = loadDb();
   const invoice: Invoice = {
     ...data,
     number: data.number ?? nextInvoiceNumber(data.pageId),
     id: uid(),
-    date: new Date().toISOString(),
   };
   db.invoices.push(invoice);
   saveDb(db);
   return invoice;
 }
 
-export function updateInvoice(id: string, data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "items">>) {
+export function updateInvoice(
+  id: string,
+  data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "clientAddress" | "items" | "date" | "status" | "notes">>
+) {
   const db = loadDb();
   const invoice = db.invoices.find((i) => i.id === id);
   if (invoice) {

@@ -29,7 +29,7 @@ export default function SignupPage() {
       toast.error(result.message);
       return;
     }
-    toast.success("مرحباً بك في صنعةبيدجز! جهّز صفحتك الآن");
+    toast.success("مرحباً بك في صنعة! جهّز صفحتك الآن");
     router.push("/dashboard/edit");
   };
 
@@ -38,7 +38,7 @@ export default function SignupPage() {
       <Link href="/" className="mb-6 flex items-center gap-2">
         <Hammer className="h-7 w-7 text-primary" />
         <span className="text-2xl font-extrabold">
-          صنعة<span className="text-primary">بيدجز</span>
+          صنعة
         </span>
       </Link>
       <Card className="w-full max-w-md">
@@ -86,7 +86,7 @@ export default function SignupPage() {
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            عندك حساب؟{" "}
+            لديك حساب بالفعل؟{" "}
             <Link href="/login" className="font-bold text-primary hover:underline">
               سجّل الدخول
             </Link>
