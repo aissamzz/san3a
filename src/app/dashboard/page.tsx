@@ -33,13 +33,15 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (page) {
+    if (!page) return;
+    (async () => {
       const today = new Date().toISOString().slice(0, 10);
+      const [allAppointments, allInvoices] = await Promise.all([getAppointments(page.id), getInvoices(page.id)]);
       setAppointments(
-        getAppointments(page.id).filter((a) => a.date >= today && a.status !== "cancelled").slice(0, 5)
+        allAppointments.filter((a) => a.date >= today && a.status !== "cancelled").slice(0, 5)
       );
-      setInvoices(getInvoices(page.id).slice(0, 5));
-    }
+      setInvoices(allInvoices.slice(0, 5));
+    })();
   }, [page]);
 
   if (!loaded || !page || !profile) return null;

@@ -54,17 +54,19 @@ export function DashboardShell({
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const session = getSession();
-    if (!session) {
-      router.replace("/login");
-      return;
-    }
-    if (session.role !== role) {
-      router.replace(session.role === "admin" ? "/admin" : "/dashboard");
-      return;
-    }
-    setProfile(session);
-    setChecked(true);
+    (async () => {
+      const session = await getSession();
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+      if (session.role !== role) {
+        router.replace(session.role === "admin" ? "/admin" : "/dashboard");
+        return;
+      }
+      setProfile(session);
+      setChecked(true);
+    })();
   }, [router, role]);
 
   if (!checked || !profile) {
@@ -79,8 +81,8 @@ export function DashboardShell({
   const isActive = (href: string) =>
     href === "/dashboard" || href === "/admin" ? pathname === href : pathname.startsWith(href);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 

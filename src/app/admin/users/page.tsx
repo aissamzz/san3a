@@ -22,7 +22,9 @@ export default function AdminUsersPage() {
   const [rows, setRows] = useState<AdminUserRow[]>([]);
   const [query, setQuery] = useState("");
 
-  const refresh = useCallback(() => setRows(getAllUsers()), []);
+  const refresh = useCallback(() => {
+    getAllUsers().then(setRows);
+  }, []);
 
   useEffect(() => {
     refresh();
@@ -123,8 +125,8 @@ export default function AdminUsersPage() {
                         variant="ghost"
                         size="sm"
                         className={page.suspended ? "text-green-600" : "text-destructive"}
-                        onClick={() => {
-                          toggleSuspend(page.id);
+                        onClick={async () => {
+                          await toggleSuspend(page.id);
                           refresh();
                           toast.success(page.suspended ? "تم إلغاء الإيقاف" : "تم إيقاف الصفحة");
                         }}

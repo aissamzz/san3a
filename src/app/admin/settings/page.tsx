@@ -1,10 +1,7 @@
 "use client";
 
-import { RefreshCw, Settings2 } from "lucide-react";
-import { toast } from "sonner";
+import { Settings2 } from "lucide-react";
 
-import { resetDemoData } from "@/lib/store";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,27 +29,6 @@ export default function AdminSettingsPage() {
             <Label>السعر السنوي (دج)</Label>
             <Input dir="ltr" value="4500" readOnly />
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">بيانات تجريبية</CardTitle>
-          <CardDescription>
-            إعادة ضبط جميع البيانات التجريبية المخزنة في هذا المتصفح (مستخدمون، صفحات، مفاتيح...)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => {
-              resetDemoData();
-              toast.success("تمت إعادة ضبط البيانات التجريبية");
-            }}
-          >
-            <RefreshCw className="h-4 w-4" />
-            إعادة ضبط البيانات
-          </Button>
         </CardContent>
       </Card>
     </div>

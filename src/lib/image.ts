@@ -1,8 +1,7 @@
-// Client-side image downscaling so uploaded photos fit comfortably in
-// the demo's localStorage. With Supabase Storage this becomes a plain
-// file upload and this helper can be dropped or kept as a pre-upload step.
+// Client-side image downscaling so uploaded photos are reasonably sized
+// before they're uploaded to Supabase Storage.
 
-export function compressImage(file: File, maxSize = 1280, quality = 0.82): Promise<string> {
+function loadAndScale(file: File, maxSize: number): Promise<HTMLCanvasElement> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -18,7 +17,7 @@ export function compressImage(file: File, maxSize = 1280, quality = 0.82): Promi
         return;
       }
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL("image/jpeg", quality));
+      resolve(canvas);
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -26,4 +25,18 @@ export function compressImage(file: File, maxSize = 1280, quality = 0.82): Promi
     };
     img.src = url;
   });
+}
+
+export function compressImage(file: File, maxSize = 1280, quality = 0.82): Promise<string> {
+  return loadAndScale(file, maxSize).then((canvas) => canvas.toDataURL("image/jpeg", quality));
+}
+
+/** Downscales an image and returns it as a JPEG Blob, ready to upload to Supabase Storage. */
+export function compressImageToBlob(file: File, maxSize = 1280, quality = 0.82): Promise<Blob> {
+  return loadAndScale(file, maxSize).then(
+    (canvas) =>
+      new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("failed to encode image"))), "image/jpeg", quality);
+      })
+  );
 }

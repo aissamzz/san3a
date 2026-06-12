@@ -19,19 +19,21 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const invoice = getInvoice(id);
-    if (!invoice) {
-      setNotFound(true);
-      return;
-    }
-    setForm({
-      clientName: invoice.clientName,
-      clientPhone: invoice.clientPhone,
-      clientAddress: invoice.clientAddress ?? "",
-      date: invoice.date.slice(0, 10),
-      notes: invoice.notes ?? "",
-      items: invoice.items,
-    });
+    (async () => {
+      const invoice = await getInvoice(id);
+      if (!invoice) {
+        setNotFound(true);
+        return;
+      }
+      setForm({
+        clientName: invoice.clientName,
+        clientPhone: invoice.clientPhone,
+        clientAddress: invoice.clientAddress ?? "",
+        date: invoice.date.slice(0, 10),
+        notes: invoice.notes ?? "",
+        items: invoice.items,
+      });
+    })();
   }, [id]);
 
   if (!loaded || !page) return null;
@@ -49,7 +51,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
 
   if (!form) return null;
 
-  const save = () => {
+  const save = async () => {
     if (!form.clientName.trim()) {
       toast.error("أدخل اسم الزبون");
       return;
@@ -59,7 +61,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       toast.error("أضف على الأقل خدمة أو منتج واحد");
       return;
     }
-    updateInvoice(id, {
+    await updateInvoice(id, {
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
       clientAddress: form.clientAddress.trim(),

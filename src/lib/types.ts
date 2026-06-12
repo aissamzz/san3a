@@ -1,13 +1,12 @@
-// Types mirroring the future Supabase schema.
-// When migrating, each interface maps to a table and the store functions
-// in src/lib/store.ts get reimplemented with supabase-js calls.
+// Types mirroring the Supabase schema (see supabase/schema.sql).
+// src/lib/store.ts maps between these camelCase app types and the
+// snake_case rows returned by supabase-js.
 
 export type Role = "user" | "admin";
 
 export interface Profile {
   id: string;
   email: string;
-  password: string; // mock only — real auth moves to Supabase Auth
   name: string;
   role: Role;
   createdAt: string;
@@ -98,12 +97,4 @@ export interface ActivationKey {
   usedByPageId: string | null;
   usedAt: string | null;
   createdAt: string;
-}
-
-export interface Database {
-  profiles: Profile[];
-  pages: Page[];
-  appointments: Appointment[];
-  invoices: Invoice[];
-  keys: ActivationKey[];
 }

@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Hammer, ImagePlus, Plus, Save, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
-import { compressImage } from "@/lib/image";
-import { uid, updatePage } from "@/lib/store";
+import { compressImageToBlob } from "@/lib/image";
+import { uid, updatePage, uploadMedia } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import { WILAYAS } from "@/lib/wilayas";
 import type { Page } from "@/lib/types";
@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 const DAY_NAMES = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 export default function EditPage() {
-  const { page, loaded } = useMyPage();
+  const { profile, page, loaded } = useMyPage();
   const [draft, setDraft] = useState<Page | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -30,12 +30,12 @@ export default function EditPage() {
     if (page) setDraft(structuredClone(page));
   }, [page]);
 
-  if (!loaded || !draft) return null;
+  if (!loaded || !draft || !profile) return null;
 
   const set = <K extends keyof Page>(key: K, value: Page[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d));
 
-  const save = () => {
+  const save = async () => {
     if (!draft.businessName.trim()) {
       toast.error("اسم النشاط إجباري");
       return;
@@ -44,7 +44,7 @@ export default function EditPage() {
       toast.error("الرابط يجب أن يحتوي فقط على حروف لاتينية صغيرة، أرقام و -");
       return;
     }
-    const result = updatePage(draft);
+    const result = await updatePage(draft);
     if (result.ok) toast.success(result.message);
     else toast.error(result.message);
   };
@@ -53,7 +53,12 @@ export default function EditPage() {
     if (!files) return;
     try {
       for (const file of Array.from(files)) {
-        const url = await compressImage(file);
+        const blob = await compressImageToBlob(file);
+        const url = await uploadMedia(profile.id, blob, `gallery/${uid()}.jpg`);
+        if (!url) {
+          toast.error("تعذّر رفع الصورة");
+          continue;
+        }
         setDraft((d) =>
           d ? { ...d, gallery: [...d.gallery, { id: uid(), url }] } : d
         );
@@ -71,7 +76,12 @@ export default function EditPage() {
     const file = files?.[0];
     if (!file) return;
     try {
-      const url = await compressImage(file, maxSize);
+      const blob = await compressImageToBlob(file, maxSize);
+      const url = await uploadMedia(profile.id, blob, `${key}.jpg`);
+      if (!url) {
+        toast.error("تعذّر رفع الصورة");
+        return;
+      }
       set(key, url);
     } catch {
       toast.error("تعذّر قراءة الصورة، جرّب صورة أخرى");

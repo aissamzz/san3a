@@ -57,7 +57,7 @@ export default function AppointmentsPage() {
   const [form, setForm] = useState(emptyForm);
 
   const refresh = useCallback(() => {
-    if (page) setAppointments(getAppointments(page.id));
+    if (page) getAppointments(page.id).then(setAppointments);
   }, [page]);
 
   useEffect(() => {
@@ -84,13 +84,13 @@ export default function AppointmentsPage() {
     setDialogOpen(true);
   };
 
-  const save = () => {
+  const save = async () => {
     if (!form.clientName.trim() || !form.date || !form.time) {
       toast.error("املأ اسم الزبون، التاريخ والساعة");
       return;
     }
     if (editingId) {
-      updateAppointment(editingId, {
+      await updateAppointment(editingId, {
         clientName: form.clientName.trim(),
         clientPhone: form.clientPhone.trim(),
         serviceName: form.serviceName,
@@ -99,7 +99,7 @@ export default function AppointmentsPage() {
       });
       toast.success("تم تعديل الموعد");
     } else {
-      addAppointment({
+      await addAppointment({
         pageId: page.id,
         clientName: form.clientName.trim(),
         clientPhone: form.clientPhone.trim(),
@@ -268,8 +268,8 @@ export default function AppointmentsPage() {
                           variant="ghost"
                           size="sm"
                           className="text-green-700"
-                          onClick={() => {
-                            updateAppointmentStatus(a.id, "confirmed");
+                          onClick={async () => {
+                            await updateAppointmentStatus(a.id, "confirmed");
                             refresh();
                             toast.success("تم تأكيد الموعد");
                           }}
@@ -287,8 +287,8 @@ export default function AppointmentsPage() {
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground"
-                          onClick={() => {
-                            updateAppointmentStatus(a.id, "cancelled");
+                          onClick={async () => {
+                            await updateAppointmentStatus(a.id, "cancelled");
                             refresh();
                             toast.success("تم إلغاء الموعد");
                           }}
@@ -301,8 +301,8 @@ export default function AppointmentsPage() {
                         variant="ghost"
                         size="sm"
                         className="ms-auto text-destructive"
-                        onClick={() => {
-                          deleteAppointment(a.id);
+                        onClick={async () => {
+                          await deleteAppointment(a.id);
                           refresh();
                           toast.success("تم حذف الموعد");
                         }}

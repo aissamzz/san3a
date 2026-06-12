@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock, Phone } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,13 +69,17 @@ export function BookingWidget({ page }: { page: Page }) {
     return result;
   }, [page.hours]);
 
-  const slots = useMemo(
-    () => (selectedDate ? getAvailableSlots(page, selectedDate) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [page, selectedDate, version]
-  );
+  const [slots, setSlots] = useState<string[]>([]);
 
-  const book = () => {
+  useEffect(() => {
+    if (!selectedDate) {
+      setSlots([]);
+      return;
+    }
+    getAvailableSlots(page, selectedDate).then(setSlots);
+  }, [page, selectedDate, version]);
+
+  const book = async () => {
     if (!selectedDate || !selectedTime) {
       toast.error("اختر التاريخ والساعة أولاً");
       return;
@@ -85,7 +89,7 @@ export function BookingWidget({ page }: { page: Page }) {
       return;
     }
 
-    addAppointment({
+    await addAppointment({
       pageId: page.id,
       clientName: clientName.trim(),
       clientPhone: "",

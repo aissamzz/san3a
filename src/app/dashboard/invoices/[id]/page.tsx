@@ -15,7 +15,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
-    setInvoice(getInvoice(id));
+    getInvoice(id).then(setInvoice);
   }, [id]);
 
   if (!loaded || !page) return null;

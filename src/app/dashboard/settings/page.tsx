@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { KeyRound, RefreshCw, ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
-import { activateWithKey, isPageLive, resetDemoData } from "@/lib/store";
+import { activateWithKey, isPageLive } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,12 +20,12 @@ export default function SettingsPage() {
 
   const live = isPageLive(page);
 
-  const activate = () => {
+  const activate = async () => {
     if (!key.trim()) {
       toast.error("أدخل مفتاح التفعيل");
       return;
     }
-    const result = activateWithKey(page.id, key);
+    const result = await activateWithKey(page.id, key);
     if (result.ok) {
       toast.success(result.message);
       setKey("");
@@ -75,9 +75,6 @@ export default function SettingsPage() {
               />
               <Button onClick={activate}>تفعيل</Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              تلميح تجريبي: جرّب المفتاح <code dir="ltr">SP-2026-DEMO-0001</code>
-            </p>
           </div>
         </CardContent>
       </Card>
@@ -101,32 +98,6 @@ export default function SettingsPage() {
               <Input value={profile.email} dir="ltr" readOnly />
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            تغيير كلمة السر وبيانات الحساب سيتوفر مع ربط المنصة بنظام المصادقة (Supabase).
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Demo reset */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">بيانات تجريبية</CardTitle>
-          <CardDescription>
-            هذه النسخة التجريبية تخزن البيانات في متصفحك فقط. يمكنك إعادة ضبطها في أي وقت.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => {
-              resetDemoData();
-              refresh();
-              toast.success("تمت إعادة ضبط البيانات التجريبية");
-            }}
-          >
-            <RefreshCw className="h-4 w-4" />
-            إعادة ضبط البيانات
-          </Button>
         </CardContent>
       </Card>
     </div>

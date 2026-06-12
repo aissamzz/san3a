@@ -1,24 +1,20 @@
-// Mock data layer backed by localStorage.
-// This module is the single integration point for the future Supabase
-// migration: every function here maps to a query/mutation on a table
-// (see src/lib/types.ts), and auth functions map to Supabase Auth.
+// Supabase-backed data layer.
+// This module is the single integration point with Supabase: every
+// function here maps to a query/mutation against the tables and RPCs
+// defined in supabase/schema.sql.
 
-import { buildSeed } from "./seed";
+import { createClient } from "./supabase/client";
 import type {
   ActivationKey,
   Appointment,
   AppointmentStatus,
-  Database,
   Invoice,
   InvoiceItem,
   Page,
   Profile,
-  WeeklyHours,
 } from "./types";
 
-// Bump the version when the seed shape changes — old browser data is discarded.
-const DB_KEY = "san3a_db_v2";
-const SESSION_KEY = "san3a_session_v1";
+const supabase = createClient();
 
 export function uid() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -28,285 +24,326 @@ export function formatDZD(amount: number) {
   return `${amount.toLocaleString("ar-DZ")} دج`;
 }
 
-function loadDb(): Database {
-  if (typeof window === "undefined") return buildSeed();
-  const raw = localStorage.getItem(DB_KEY);
-  if (!raw) {
-    const seed = buildSeed();
-    localStorage.setItem(DB_KEY, JSON.stringify(seed));
-    return seed;
-  }
-  try {
-    return JSON.parse(raw) as Database;
-  } catch {
-    const seed = buildSeed();
-    localStorage.setItem(DB_KEY, JSON.stringify(seed));
-    return seed;
-  }
+export function invoiceTotal(items: InvoiceItem[]) {
+  return items.reduce((sum, item) => sum + item.qty * item.price, 0);
 }
 
-function saveDb(db: Database) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+// ---------- Row <-> app type mapping ----------
+
+function rowToProfile(row: Record<string, unknown>): Profile {
+  return {
+    id: row.id as string,
+    email: row.email as string,
+    name: row.name as string,
+    role: row.role as Profile["role"],
+    createdAt: row.created_at as string,
+  };
 }
 
-export function resetDemoData() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(DB_KEY);
-  loadDb();
+function rowToPage(row: Record<string, unknown>): Page {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    slug: row.slug as string,
+    businessName: row.business_name as string,
+    craft: row.craft as string,
+    city: row.city as string,
+    description: row.description as string,
+    phone: row.phone as string,
+    whatsapp: row.whatsapp as string,
+    avatarUrl: row.avatar_url as string,
+    coverUrl: row.cover_url as string,
+    services: (row.services as Page["services"]) ?? [],
+    gallery: (row.gallery as Page["gallery"]) ?? [],
+    hours: (row.hours as Page["hours"]) ?? {},
+    activated: row.activated as boolean,
+    activatedUntil: (row.activated_until as string | null) ?? null,
+    suspended: row.suspended as boolean,
+    createdAt: row.created_at as string,
+  };
+}
+
+function pageToRow(page: Page) {
+  return {
+    slug: page.slug,
+    business_name: page.businessName,
+    craft: page.craft,
+    city: page.city,
+    description: page.description,
+    phone: page.phone,
+    whatsapp: page.whatsapp,
+    avatar_url: page.avatarUrl,
+    cover_url: page.coverUrl,
+    services: page.services,
+    gallery: page.gallery,
+    hours: page.hours,
+  };
+}
+
+function rowToAppointment(row: Record<string, unknown>): Appointment {
+  return {
+    id: row.id as string,
+    pageId: row.page_id as string,
+    clientName: row.client_name as string,
+    clientPhone: row.client_phone as string,
+    serviceName: row.service_name as string,
+    date: row.date as string,
+    time: row.time as string,
+    status: row.status as Appointment["status"],
+    source: row.source as Appointment["source"],
+    createdAt: row.created_at as string,
+  };
+}
+
+function rowToInvoice(row: Record<string, unknown>): Invoice {
+  return {
+    id: row.id as string,
+    pageId: row.page_id as string,
+    number: row.number as string,
+    clientName: row.client_name as string,
+    clientPhone: row.client_phone as string,
+    clientAddress: row.client_address as string,
+    items: (row.items as InvoiceItem[]) ?? [],
+    date: row.date as string,
+    notes: row.notes as string,
+  };
+}
+
+function rowToKey(row: Record<string, unknown>): ActivationKey {
+  return {
+    id: row.id as string,
+    code: row.code as string,
+    status: row.status as ActivationKey["status"],
+    usedByPageId: (row.used_by_page_id as string | null) ?? null,
+    usedAt: (row.used_at as string | null) ?? null,
+    createdAt: row.created_at as string,
+  };
 }
 
 // ---------- Auth ----------
 
-export function login(email: string, password: string): Profile | null {
-  const db = loadDb();
-  const profile = db.profiles.find(
-    (p) => p.email.toLowerCase() === email.trim().toLowerCase() && p.password === password
-  );
-  if (!profile) return null;
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: profile.id }));
-  return profile;
+export async function login(email: string, password: string): Promise<Profile | null> {
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+  if (error) return null;
+  return getSession();
 }
 
-export function signup(name: string, email: string, password: string): { ok: boolean; message: string } {
-  const db = loadDb();
-  if (db.profiles.some((p) => p.email.toLowerCase() === email.trim().toLowerCase())) {
-    return { ok: false, message: "هذا البريد الإلكتروني مسجّل من قبل" };
-  }
-  const userId = uid();
-  const profile: Profile = {
-    id: userId,
+export async function signup(
+  name: string,
+  email: string,
+  password: string
+): Promise<{ ok: boolean; message: string; needsConfirmation?: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
     email: email.trim(),
     password,
-    name: name.trim(),
-    role: "user",
-    createdAt: new Date().toISOString(),
-  };
-  const defaultHours: WeeklyHours = {
-    0: { enabled: true, from: "09:00", to: "17:00" },
-    1: { enabled: true, from: "09:00", to: "17:00" },
-    2: { enabled: true, from: "09:00", to: "17:00" },
-    3: { enabled: true, from: "09:00", to: "17:00" },
-    4: { enabled: true, from: "09:00", to: "17:00" },
-    5: { enabled: false, from: "09:00", to: "17:00" },
-    6: { enabled: false, from: "09:00", to: "17:00" },
-  };
-  const page: Page = {
-    id: uid(),
-    userId,
-    slug: uniqueSlug(db, name),
-    businessName: name.trim(),
-    craft: "",
-    city: "الجزائر",
-    description: "",
-    phone: "",
-    whatsapp: "",
-    avatarUrl: "",
-    coverUrl: "",
-    services: [],
-    gallery: [],
-    hours: defaultHours,
-    activated: false,
-    activatedUntil: null,
-    suspended: false,
-    createdAt: new Date().toISOString(),
-  };
-  db.profiles.push(profile);
-  db.pages.push(page);
-  saveDb(db);
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ userId }));
+    options: { data: { name: name.trim() } },
+  });
+  if (error) {
+    if (error.message.toLowerCase().includes("already registered")) {
+      return { ok: false, message: "هذا البريد الإلكتروني مسجّل من قبل" };
+    }
+    return { ok: false, message: error.message };
+  }
+  if (!data.session) {
+    return {
+      ok: true,
+      message: "تم إنشاء الحساب! تحقق من بريدك الإلكتروني لتأكيد التسجيل",
+      needsConfirmation: true,
+    };
+  }
   return { ok: true, message: "تم إنشاء الحساب بنجاح" };
 }
 
-export function logout() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(SESSION_KEY);
+export async function logout() {
+  await supabase.auth.signOut();
 }
 
-export function getSession(): Profile | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(SESSION_KEY);
-  if (!raw) return null;
-  try {
-    const { userId } = JSON.parse(raw) as { userId: string };
-    return loadDb().profiles.find((p) => p.id === userId) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function uniqueSlug(db: Database, name: string) {
-  const base =
-    name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9؀-ۿ]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "page";
-  let slug = base;
-  let i = 1;
-  while (db.pages.some((p) => p.slug === slug)) {
-    slug = `${base}-${++i}`;
-  }
-  return slug;
+export async function getSession(): Promise<Profile | null> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) return null;
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", userData.user.id).single();
+  if (error || !data) return null;
+  return rowToProfile(data);
 }
 
 // ---------- Pages ----------
 
-export function getPageBySlug(slug: string): Page | null {
-  return loadDb().pages.find((p) => p.slug === slug) ?? null;
+export async function getPageBySlug(slug: string): Promise<Page | null> {
+  const { data, error } = await supabase.from("pages").select("*").eq("slug", slug).maybeSingle();
+  if (error || !data) return null;
+  return rowToPage(data);
 }
 
-export function getPageByUserId(userId: string): Page | null {
-  return loadDb().pages.find((p) => p.userId === userId) ?? null;
+export async function getPageByUserId(userId: string): Promise<Page | null> {
+  const { data, error } = await supabase.from("pages").select("*").eq("user_id", userId).maybeSingle();
+  if (error || !data) return null;
+  return rowToPage(data);
 }
 
-export function updatePage(page: Page): { ok: boolean; message: string } {
-  const db = loadDb();
-  if (db.pages.some((p) => p.slug === page.slug && p.id !== page.id)) {
-    return { ok: false, message: "هذا الرابط مستعمل من طرف صفحة أخرى" };
+export async function updatePage(page: Page): Promise<{ ok: boolean; message: string }> {
+  const { error } = await supabase.from("pages").update(pageToRow(page)).eq("id", page.id);
+  if (error) {
+    if (error.code === "23505") {
+      return { ok: false, message: "هذا الرابط مستعمل من طرف صفحة أخرى" };
+    }
+    return { ok: false, message: "حدث خطأ أثناء الحفظ" };
   }
-  const idx = db.pages.findIndex((p) => p.id === page.id);
-  if (idx === -1) return { ok: false, message: "الصفحة غير موجودة" };
-  db.pages[idx] = page;
-  saveDb(db);
   return { ok: true, message: "تم حفظ التغييرات" };
 }
 
 // ---------- Appointments ----------
 
-export function getAppointments(pageId: string): Appointment[] {
-  return loadDb()
-    .appointments.filter((a) => a.pageId === pageId)
-    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+export async function getAppointments(pageId: string): Promise<Appointment[]> {
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .eq("page_id", pageId)
+    .order("date", { ascending: true })
+    .order("time", { ascending: true });
+  if (error || !data) return [];
+  return data.map(rowToAppointment);
 }
 
-export function addAppointment(
-  data: Omit<Appointment, "id" | "createdAt">
-): Appointment {
-  const db = loadDb();
-  const appointment: Appointment = {
-    ...data,
-    id: uid(),
-    createdAt: new Date().toISOString(),
-  };
-  db.appointments.push(appointment);
-  saveDb(db);
-  return appointment;
+export async function addAppointment(data: Omit<Appointment, "id" | "createdAt">): Promise<Appointment | null> {
+  const { data: row, error } = await supabase
+    .from("appointments")
+    .insert({
+      page_id: data.pageId,
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      service_name: data.serviceName,
+      date: data.date,
+      time: data.time,
+      status: data.status,
+      source: data.source,
+    })
+    .select("*")
+    .single();
+  if (error || !row) return null;
+  return rowToAppointment(row);
 }
 
-export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
-  const db = loadDb();
-  const a = db.appointments.find((x) => x.id === id);
-  if (a) {
-    a.status = status;
-    saveDb(db);
-  }
+export async function updateAppointmentStatus(id: string, status: AppointmentStatus) {
+  await supabase.from("appointments").update({ status }).eq("id", id);
 }
 
-export function updateAppointment(id: string, data: Partial<Omit<Appointment, "id" | "pageId" | "createdAt">>) {
-  const db = loadDb();
-  const a = db.appointments.find((x) => x.id === id);
-  if (a) {
-    Object.assign(a, data);
-    saveDb(db);
-  }
+export async function updateAppointment(
+  id: string,
+  data: Partial<Omit<Appointment, "id" | "pageId" | "createdAt">>
+) {
+  const patch: Record<string, unknown> = {};
+  if (data.clientName !== undefined) patch.client_name = data.clientName;
+  if (data.clientPhone !== undefined) patch.client_phone = data.clientPhone;
+  if (data.serviceName !== undefined) patch.service_name = data.serviceName;
+  if (data.date !== undefined) patch.date = data.date;
+  if (data.time !== undefined) patch.time = data.time;
+  if (data.status !== undefined) patch.status = data.status;
+  if (data.source !== undefined) patch.source = data.source;
+  await supabase.from("appointments").update(patch).eq("id", id);
 }
 
-export function deleteAppointment(id: string) {
-  const db = loadDb();
-  db.appointments = db.appointments.filter((a) => a.id !== id);
-  saveDb(db);
+export async function deleteAppointment(id: string) {
+  await supabase.from("appointments").delete().eq("id", id);
 }
 
 /** Times already taken (pending or confirmed) for a page on a given day. */
-export function getBookedTimes(pageId: string, date: string): string[] {
-  return loadDb()
-    .appointments.filter(
-      (a) => a.pageId === pageId && a.date === date && a.status !== "cancelled"
-    )
-    .map((a) => a.time);
+export async function getBookedTimes(pageId: string, date: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("time")
+    .eq("page_id", pageId)
+    .eq("date", date)
+    .neq("status", "cancelled");
+  if (error || !data) return [];
+  return data.map((row) => row.time as string);
 }
 
 // ---------- Invoices ----------
 
-export function getInvoices(pageId: string): Invoice[] {
-  return loadDb()
-    .invoices.filter((i) => i.pageId === pageId)
-    .sort((a, b) => b.date.localeCompare(a.date));
+export async function getInvoices(pageId: string): Promise<Invoice[]> {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("page_id", pageId)
+    .order("date", { ascending: false });
+  if (error || !data) return [];
+  return data.map(rowToInvoice);
 }
 
-export function getInvoice(id: string): Invoice | null {
-  return loadDb().invoices.find((i) => i.id === id) ?? null;
+export async function getInvoice(id: string): Promise<Invoice | null> {
+  const { data, error } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return rowToInvoice(data);
 }
 
-export function nextInvoiceNumber(pageId: string): string {
+async function nextInvoiceNumber(pageId: string): Promise<string> {
   const year = new Date().getFullYear();
-  const count = loadDb().invoices.filter(
-    (i) => i.pageId === pageId && i.number.includes(`-${year}-`)
-  ).length;
-  return `INV-${year}-${String(count + 1).padStart(3, "0")}`;
+  const { count } = await supabase
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("page_id", pageId)
+    .like("number", `%-${year}-%`);
+  return `INV-${year}-${String((count ?? 0) + 1).padStart(3, "0")}`;
 }
 
-export function addInvoice(
-  data: Omit<Invoice, "id" | "number"> & { number?: string }
-): Invoice {
-  const db = loadDb();
-  const invoice: Invoice = {
-    ...data,
-    number: data.number ?? nextInvoiceNumber(data.pageId),
-    id: uid(),
-  };
-  db.invoices.push(invoice);
-  saveDb(db);
-  return invoice;
+export async function addInvoice(data: Omit<Invoice, "id" | "number"> & { number?: string }): Promise<Invoice | null> {
+  const number = data.number ?? (await nextInvoiceNumber(data.pageId));
+  const { data: row, error } = await supabase
+    .from("invoices")
+    .insert({
+      page_id: data.pageId,
+      number,
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      client_address: data.clientAddress,
+      items: data.items,
+      date: data.date,
+      notes: data.notes,
+    })
+    .select("*")
+    .single();
+  if (error || !row) return null;
+  return rowToInvoice(row);
 }
 
-export function updateInvoice(
+export async function updateInvoice(
   id: string,
   data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "clientAddress" | "items" | "date" | "notes">>
 ) {
-  const db = loadDb();
-  const invoice = db.invoices.find((i) => i.id === id);
-  if (invoice) {
-    Object.assign(invoice, data);
-    saveDb(db);
-  }
-  return invoice ?? null;
+  const patch: Record<string, unknown> = {};
+  if (data.clientName !== undefined) patch.client_name = data.clientName;
+  if (data.clientPhone !== undefined) patch.client_phone = data.clientPhone;
+  if (data.clientAddress !== undefined) patch.client_address = data.clientAddress;
+  if (data.items !== undefined) patch.items = data.items;
+  if (data.date !== undefined) patch.date = data.date;
+  if (data.notes !== undefined) patch.notes = data.notes;
+  await supabase.from("invoices").update(patch).eq("id", id);
 }
 
-export function deleteInvoice(id: string) {
-  const db = loadDb();
-  db.invoices = db.invoices.filter((i) => i.id !== id);
-  saveDb(db);
-}
-
-export function invoiceTotal(items: InvoiceItem[]) {
-  return items.reduce((sum, item) => sum + item.qty * item.price, 0);
+export async function deleteInvoice(id: string) {
+  await supabase.from("invoices").delete().eq("id", id);
 }
 
 // ---------- Activation ----------
 
-export function activateWithKey(pageId: string, code: string): { ok: boolean; message: string } {
-  const db = loadDb();
-  const key = db.keys.find((k) => k.code.trim().toUpperCase() === code.trim().toUpperCase());
-  if (!key) return { ok: false, message: "مفتاح التفعيل غير صحيح" };
-  if (key.status === "used") return { ok: false, message: "هذا المفتاح مستعمل من قبل" };
-  const page = db.pages.find((p) => p.id === pageId);
-  if (!page) return { ok: false, message: "الصفحة غير موجودة" };
+export async function activateWithKey(pageId: string, code: string): Promise<{ ok: boolean; message: string }> {
+  const { data, error } = await supabase.rpc("activate_page_with_key", { p_page_id: pageId, p_code: code });
+  if (error) return { ok: false, message: "حدث خطأ أثناء التفعيل" };
+  return { ok: Boolean(data?.ok), message: data?.message as string };
+}
 
-  const base =
-    page.activated && page.activatedUntil && new Date(page.activatedUntil) > new Date()
-      ? new Date(page.activatedUntil)
-      : new Date();
-  base.setFullYear(base.getFullYear() + 1);
+// ---------- Storage ----------
 
-  page.activated = true;
-  page.activatedUntil = base.toISOString().slice(0, 10);
-  key.status = "used";
-  key.usedByPageId = page.id;
-  key.usedAt = new Date().toISOString();
-  saveDb(db);
-  return { ok: true, message: `تم تفعيل صفحتك حتى ${page.activatedUntil}` };
+/** Uploads a file to the public "media" bucket under the current user's folder and returns its public URL. */
+export async function uploadMedia(userId: string, file: Blob, path: string): Promise<string | null> {
+  const filePath = `${userId}/${path}`;
+  const { error } = await supabase.storage.from("media").upload(filePath, file, {
+    upsert: true,
+    contentType: file.type || "image/jpeg",
+  });
+  if (error) return null;
+  const { data } = supabase.storage.from("media").getPublicUrl(filePath);
+  return data.publicUrl;
 }
 
 // ---------- Admin ----------
@@ -316,87 +353,95 @@ export interface AdminUserRow {
   page: Page | null;
 }
 
-export function getAllUsers(): AdminUserRow[] {
-  const db = loadDb();
-  return db.profiles
-    .filter((p) => p.role === "user")
-    .map((profile) => ({
-      profile,
-      page: db.pages.find((pg) => pg.userId === profile.id) ?? null,
-    }));
+export async function getAllUsers(): Promise<AdminUserRow[]> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*, pages(*)")
+    .eq("role", "user")
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map((row) => {
+    const pages = (row.pages as Record<string, unknown>[]) ?? [];
+    return {
+      profile: rowToProfile(row),
+      page: pages.length > 0 ? rowToPage(pages[0]) : null,
+    };
+  });
 }
 
-export function getAllKeys(): ActivationKey[] {
-  return [...loadDb().keys].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export async function getAllKeys(): Promise<ActivationKey[]> {
+  const { data, error } = await supabase.from("activation_keys").select("*").order("created_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(rowToKey);
 }
 
-export function getPageById(id: string): Page | null {
-  return loadDb().pages.find((p) => p.id === id) ?? null;
+export async function getPageById(id: string): Promise<Page | null> {
+  const { data, error } = await supabase.from("pages").select("*").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return rowToPage(data);
 }
 
-export function generateKeys(count: number): ActivationKey[] {
-  const db = loadDb();
+export async function generateKeys(count: number): Promise<ActivationKey[]> {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
-  const block = () =>
-    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-  const created: ActivationKey[] = [];
-  for (let i = 0; i < count; i++) {
-    created.push({
-      id: uid(),
-      code: `SP-${block()}-${block()}-${block()}`,
-      status: "unused",
-      usedByPageId: null,
-      usedAt: null,
-      createdAt: new Date().toISOString(),
-    });
-  }
-  db.keys.push(...created);
-  saveDb(db);
-  return created;
+  const block = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  const rows = Array.from({ length: count }, () => ({ code: `SP-${block()}-${block()}-${block()}` }));
+  const { data, error } = await supabase.from("activation_keys").insert(rows).select("*");
+  if (error || !data) return [];
+  return data.map(rowToKey);
 }
 
-export function toggleSuspend(pageId: string) {
-  const db = loadDb();
-  const page = db.pages.find((p) => p.id === pageId);
-  if (page) {
-    page.suspended = !page.suspended;
-    saveDb(db);
-  }
+export async function toggleSuspend(pageId: string) {
+  const page = await getPageById(pageId);
+  if (!page) return;
+  await supabase.from("pages").update({ suspended: !page.suspended }).eq("id", pageId);
 }
 
-export function getAdminStats() {
-  const db = loadDb();
-  const users = db.profiles.filter((p) => p.role === "user").length;
+export async function getAdminStats() {
   const today = new Date().toISOString().slice(0, 10);
-  const active = db.pages.filter(
-    (p) => p.activated && p.activatedUntil && p.activatedUntil >= today && !p.suspended
-  ).length;
-  const inactive = db.pages.length - active;
-  const keysUsed = db.keys.filter((k) => k.status === "used").length;
-  const keysUnused = db.keys.length - keysUsed;
-  return { users, active, inactive, keysUsed, keysUnused, totalKeys: db.keys.length };
+
+  const [{ count: users }, { count: totalPages }, { count: active }, { count: keysUsed }, { count: totalKeys }] =
+    await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "user"),
+      supabase.from("pages").select("id", { count: "exact", head: true }),
+      supabase
+        .from("pages")
+        .select("id", { count: "exact", head: true })
+        .eq("activated", true)
+        .eq("suspended", false)
+        .gte("activated_until", today),
+      supabase.from("activation_keys").select("id", { count: "exact", head: true }).eq("status", "used"),
+      supabase.from("activation_keys").select("id", { count: "exact", head: true }),
+    ]);
+
+  const activeCount = active ?? 0;
+  const totalKeysCount = totalKeys ?? 0;
+  const keysUsedCount = keysUsed ?? 0;
+
+  return {
+    users: users ?? 0,
+    active: activeCount,
+    inactive: (totalPages ?? 0) - activeCount,
+    keysUsed: keysUsedCount,
+    keysUnused: totalKeysCount - keysUsedCount,
+    totalKeys: totalKeysCount,
+  };
 }
 
 // ---------- Availability helpers ----------
 
 export function isPageLive(page: Page): boolean {
   const today = new Date().toISOString().slice(0, 10);
-  return (
-    page.activated &&
-    !page.suspended &&
-    !!page.activatedUntil &&
-    page.activatedUntil >= today
-  );
+  return page.activated && !page.suspended && !!page.activatedUntil && page.activatedUntil >= today;
 }
 
 /** Hourly slots for a page on a given date (YYYY-MM-DD), excluding booked ones. */
-export function getAvailableSlots(page: Page, date: string): string[] {
+export async function getAvailableSlots(page: Page, date: string): Promise<string[]> {
   const day = new Date(date + "T00:00:00").getDay();
   const hours = page.hours[day];
   if (!hours || !hours.enabled) return [];
   const fromH = parseInt(hours.from.slice(0, 2), 10);
   const toH = parseInt(hours.to.slice(0, 2), 10);
-  const booked = new Set(getBookedTimes(page.id, date));
+  const booked = new Set(await getBookedTimes(page.id, date));
   const slots: string[] = [];
   for (let h = fromH; h < toH; h++) {
     const t = `${String(h).padStart(2, "0")}:00`;

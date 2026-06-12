@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Hammer, ShieldCheck, UserRound } from "lucide-react";
+import { Hammer } from "lucide-react";
 import { toast } from "sonner";
 
 import { login } from "@/lib/store";
@@ -11,15 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const doLogin = (loginEmail: string, loginPassword: string) => {
-    const profile = login(loginEmail, loginPassword);
+  const doLogin = async (loginEmail: string, loginPassword: string) => {
+    const profile = await login(loginEmail, loginPassword);
     if (!profile) {
       toast.error("البريد الإلكتروني أو كلمة السر غير صحيحة");
       return;
@@ -76,29 +75,6 @@ export default function LoginPage() {
               دخول
             </Button>
           </form>
-
-          <div className="flex items-center gap-3">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">حسابات تجريبية</span>
-            <Separator className="flex-1" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => doLogin("demo@san3apages.com", "demo1234")}
-            >
-              <UserRound className="h-4 w-4" />
-              دخول كحرفي
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => doLogin("admin@san3apages.com", "admin1234")}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              دخول كمسؤول
-            </Button>
-          </div>
 
           <p className="text-center text-sm text-muted-foreground">
             ليس لديك حساب؟{" "}
