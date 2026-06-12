@@ -77,8 +77,6 @@ export interface InvoiceItem {
   price: number; // DZD per unit
 }
 
-export type InvoiceStatus = "paid" | "unpaid";
-
 export interface Invoice {
   id: string;
   pageId: string;
@@ -88,7 +86,6 @@ export interface Invoice {
   clientAddress: string;
   items: InvoiceItem[];
   date: string; // "YYYY-MM-DD"
-  status: InvoiceStatus;
   notes: string;
 }
 

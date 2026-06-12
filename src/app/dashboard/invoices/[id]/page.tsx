@@ -32,7 +32,6 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const total = invoiceTotal(invoice.items);
-  const paid = invoice.status === "paid";
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
@@ -67,43 +66,30 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="min-w-0">
               <h1 className="text-2xl font-extrabold leading-tight">{page.businessName}</h1>
-              {page.craft && <p className="mt-0.5 font-semibold text-primary">{page.craft}</p>}
               <div className="mt-3 space-y-0.5 text-sm text-muted-foreground">
                 {page.city && <p>{page.city}</p>}
-                {page.phone && <p dir="ltr" className="text-start">{page.phone}</p>}
-                <p dir="ltr" className="text-start">
+                {page.phone && <p dir="ltr" className="text-end">{page.phone}</p>}
+                <p dir="ltr" className="text-end">
                   san3apages.com/{page.slug}
                 </p>
               </div>
             </div>
             <div className="shrink-0 text-end">
               <div className="text-3xl font-extrabold tracking-tight text-primary">فاتورة</div>
-              <table className="mt-3 ms-auto text-sm">
-                <tbody>
-                  <tr>
-                    <td className="pe-4 py-0.5 text-muted-foreground">رقم الفاتورة</td>
-                    <td className="py-0.5 font-bold tabular-nums" dir="ltr">
-                      {invoice.number}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="pe-4 py-0.5 text-muted-foreground">التاريخ</td>
-                    <td className="py-0.5 font-bold tabular-nums" dir="ltr">
-                      {invoice.date.slice(0, 10)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <span
-                className={
-                  "mt-3 inline-block rounded-lg border-2 px-3 py-1 text-sm font-extrabold " +
-                  (paid
-                    ? "border-green-600 text-green-700"
-                    : "border-amber-500 text-amber-700")
-                }
-              >
-                {paid ? "مدفوعة" : "غير مدفوعة"}
-              </span>
+              <div className="mt-3 space-y-1 text-sm">
+                <div className="flex items-center justify-end gap-2">
+                  <span className="text-muted-foreground">رقم الفاتورة</span>
+                  <span className="font-bold tabular-nums" dir="ltr">
+                    {invoice.number}
+                  </span>
+                </div>
+                <div className="flex items-center justify-end gap-2">
+                  <span className="text-muted-foreground">التاريخ</span>
+                  <span className="font-bold tabular-nums" dir="ltr">
+                    {invoice.date.slice(0, 10)}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -115,7 +101,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div className="mt-1.5 text-lg font-bold">{invoice.clientName}</div>
             <div className="mt-0.5 space-y-0.5 text-sm text-muted-foreground">
               {invoice.clientPhone && (
-                <p dir="ltr" className="text-start">
+                <p dir="ltr" className="text-end">
                   {invoice.clientPhone}
                 </p>
               )}
@@ -153,14 +139,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Totals */}
           <div className="mt-6 flex justify-end">
-            <div className="w-full max-w-xs space-y-2">
-              <div className="flex items-center justify-between rounded-xl bg-primary px-5 py-3.5 text-primary-foreground">
-                <span className="font-extrabold">المجموع الكلي</span>
-                <span className="text-lg font-extrabold tabular-nums">{formatDZD(total)}</span>
-              </div>
-              {paid && (
-                <p className="text-end text-xs text-green-700">تم استلام المبلغ كاملاً</p>
-              )}
+            <div className="flex w-full max-w-xs items-center justify-between border-t-2 border-foreground/80 pt-3">
+              <span className="font-extrabold">المجموع الكلي</span>
+              <span className="text-lg font-extrabold tabular-nums">{formatDZD(total)}</span>
             </div>
           </div>
 

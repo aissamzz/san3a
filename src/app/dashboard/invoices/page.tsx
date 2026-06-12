@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Eye, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteInvoice, formatDZD, getInvoices, invoiceTotal, updateInvoice } from "@/lib/store";
+import { deleteInvoice, formatDZD, getInvoices, invoiceTotal } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import type { Invoice } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -62,11 +61,6 @@ export default function InvoicesPage() {
                   <div className="min-w-0">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="truncate font-bold">{invoice.clientName}</span>
-                      {invoice.status === "paid" ? (
-                        <Badge variant="success" className="shrink-0">مدفوعة</Badge>
-                      ) : (
-                        <Badge variant="warning" className="shrink-0">غير مدفوعة</Badge>
-                      )}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                       <span dir="ltr">{invoice.number}</span> • {invoice.date.slice(0, 10)}
@@ -92,21 +86,6 @@ export default function InvoicesPage() {
                       تعديل
                     </Link>
                   </Button>
-                  {invoice.status === "unpaid" && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-green-700"
-                      onClick={() => {
-                        updateInvoice(invoice.id, { status: "paid" });
-                        refresh();
-                        toast.success("تم تسجيل الفاتورة كمدفوعة");
-                      }}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      تسجيل كمدفوعة
-                    </Button>
-                  )}
                   <Button
                     variant="ghost"
                     size="sm"

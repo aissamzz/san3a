@@ -33,7 +33,6 @@ export default function NewInvoicePage() {
       clientPhone: form.clientPhone.trim(),
       clientAddress: form.clientAddress.trim(),
       date: form.date,
-      status: form.status,
       notes: form.notes.trim(),
       items: validItems,
     });

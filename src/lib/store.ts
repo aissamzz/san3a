@@ -263,7 +263,7 @@ export function addInvoice(
 
 export function updateInvoice(
   id: string,
-  data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "clientAddress" | "items" | "date" | "status" | "notes">>
+  data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "clientAddress" | "items" | "date" | "notes">>
 ) {
   const db = loadDb();
   const invoice = db.invoices.find((i) => i.id === id);

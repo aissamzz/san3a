@@ -29,7 +29,6 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       clientPhone: invoice.clientPhone,
       clientAddress: invoice.clientAddress ?? "",
       date: invoice.date.slice(0, 10),
-      status: invoice.status ?? "unpaid",
       notes: invoice.notes ?? "",
       items: invoice.items,
     });
@@ -65,7 +64,6 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       clientPhone: form.clientPhone.trim(),
       clientAddress: form.clientAddress.trim(),
       date: form.date,
-      status: form.status,
       notes: form.notes.trim(),
       items: validItems,
     });
