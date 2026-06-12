@@ -159,7 +159,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 <span className="text-lg font-extrabold tabular-nums">{formatDZD(total)}</span>
               </div>
               {paid && (
-                <p className="text-end text-xs text-green-700">تم استلام المبلغ كاملاً ✓</p>
+                <p className="text-end text-xs text-green-700">تم استلام المبلغ كاملاً</p>
               )}
             </div>
           </div>

@@ -57,7 +57,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-5 sm:space-y-6">
       <div className="min-w-0">
-        <h1 className="truncate text-xl font-extrabold sm:text-2xl">مرحباً {profile.name} 👋</h1>
+        <h1 className="truncate text-xl font-extrabold sm:text-2xl">مرحباً {profile.name}</h1>
         <p className="text-sm text-muted-foreground sm:text-base">هذه نظرة سريعة على نشاطك</p>
       </div>
 

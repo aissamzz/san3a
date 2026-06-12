@@ -127,7 +127,7 @@ export default function AppointmentsPage() {
         <div className="min-w-0">
           <h1 className="text-xl font-extrabold sm:text-2xl">المواعيد</h1>
           <p className="text-sm text-muted-foreground sm:text-base">
-            حجوزات الصفحة تظهر هنا تلقائياً، وتقدر تضيف مواعيدك يدوياً
+            تظهر حجوزات صفحتك هنا تلقائياً، ويمكنك إضافة مواعيدك يدوياً
           </p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

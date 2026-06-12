@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 import { Toaster } from "sonner";
+
+import { BRAND, SITE_URL } from "@/lib/config";
 import "./globals.css";
 
 const cairo = Cairo({
@@ -9,9 +11,45 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "صنعة بيدجز | صفحتك المهنية في دقائق",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${BRAND} | صفحات احترافية للحرفيين في الجزائر`,
+    template: `%s | ${BRAND}`,
+  },
   description:
-    "أنشئ صفحة احترافية لعرض خدماتك وأعمالك واستقبل حجوزات زبائنك عبر واتساب. منصة الحرفيين في الجزائر.",
+    "أنشئ صفحة احترافية لعرض أعمالك وخدماتك واستقبل حجوزات زبائنك عبر واتساب، مع فواتير جاهزة للطباعة ورمز QR. منصة صنعة للحرفيين في الجزائر.",
+  keywords: [
+    "صنعة",
+    "حرفيين الجزائر",
+    "صفحة احترافية للحرفي",
+    "حجز مواعيد واتساب",
+    "فواتير للحرفيين",
+    "نجار",
+    "دهان",
+    "حلويات",
+    "مصور",
+    "san3apages",
+  ],
+  applicationName: BRAND,
+  openGraph: {
+    type: "website",
+    locale: "ar_DZ",
+    siteName: BRAND,
+    url: SITE_URL,
+    title: `${BRAND} | صفحات احترافية للحرفيين في الجزائر`,
+    description:
+      "صفحة احترافية لعرض أعمالك مع حجز المواعيد عبر واتساب، فواتير PDF ورمز QR — اشتراك سنوي بـ 4500 دج دون بطاقة بنكية.",
+  },
+  twitter: {
+    card: "summary",
+    title: `${BRAND} | صفحات احترافية للحرفيين في الجزائر`,
+    description:
+      "صفحة احترافية لعرض أعمالك مع حجز المواعيد عبر واتساب، فواتير PDF ورمز QR.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

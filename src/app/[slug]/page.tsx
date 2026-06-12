@@ -2,7 +2,8 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Eye, Hammer, MapPin, Phone } from "lucide-react";
+import { CalendarDays, Eye, Hammer, MapPin, Phone, Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { formatDZD, getPageBySlug, isPageLive } from "@/lib/store";
 import type { Page } from "@/lib/types";
@@ -21,9 +22,28 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
 
   useEffect(() => {
     setIsPreview(new URLSearchParams(window.location.search).get("preview") === "1");
-    setPage(getPageBySlug(slug));
+    const found = getPageBySlug(slug);
+    setPage(found);
     setLoaded(true);
+    if (found) {
+      document.title = `${found.businessName}${found.craft ? ` – ${found.craft}` : ""} في ${found.city} | صنعة`;
+    }
   }, [slug]);
+
+  const share = async () => {
+    const url = window.location.origin + window.location.pathname;
+    const title = page ? page.businessName : "صنعة";
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+        return;
+      } catch {
+        // user cancelled — fall through to clipboard
+      }
+    }
+    await navigator.clipboard.writeText(url);
+    toast.success("تم نسخ رابط الصفحة");
+  };
 
   if (!loaded) {
     return (
@@ -42,7 +62,7 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
           الصفحة التي تبحث عنها غير موجودة أو غير مفعّلة حالياً.
         </p>
         <Button asChild>
-          <Link href="/">العودة إلى صنعةبيدجز</Link>
+          <Link href="/">العودة إلى منصة صنعة</Link>
         </Button>
       </div>
     );
@@ -109,6 +129,9 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
                 اتصل الآن
               </a>
             </Button>
+            <Button variant="outline" size="icon" className="h-11 w-11" onClick={share} aria-label="مشاركة الصفحة">
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -155,7 +178,7 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
       {/* Footer */}
       <footer className="border-t bg-card py-5 pb-24 text-center text-sm text-muted-foreground sm:pb-5">
         <Link href="/" className="transition-colors hover:text-primary">
-          صُنع بواسطة <span className="font-bold">san3apages</span> 🛠️
+          صُنع بواسطة <span className="font-bold">san3apages</span>
         </Link>
       </footer>
 

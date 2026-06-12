@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -10,44 +11,59 @@ import {
   ReceiptText,
   Sparkles,
   UserPlus,
-  Camera,
   CakeSlice,
 } from "lucide-react";
 
+import { BRAND, PRICE_DZD, SITE_URL, SUPPORT_EMAIL } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SiteHeader } from "@/components/public/site-header";
+import { SiteFooter } from "@/components/public/site-footer";
 import { WhatsAppIcon } from "@/components/public/whatsapp-icon";
+
+export const metadata: Metadata = {
+  title: "صنعة | صفحات احترافية للحرفيين في الجزائر",
+  description:
+    "أنشئ صفحة احترافية لعرض أعمالك وخدماتك مع حجز المواعيد عبر واتساب، فواتير جاهزة للطباعة ورمز QR. منصة صنعة للحرفيين في الجزائر — اشتراك سنوي بـ 4500 دج.",
+  alternates: { canonical: "/" },
+};
 
 const features = [
   {
     icon: Sparkles,
-    title: "صفحة احترافية بإسمك",
-    description: "اعرض خدماتك، أسعارك وصور أعمالك في رابط واحد سهل المشاركة: san3apages.com/إسمك",
+    title: "صفحة احترافية باسمك",
+    description:
+      "اعرض خدماتك وأسعارك وصور أعمالك في رابط واحد يسهل مشاركته مع زبائنك: san3apages.com/اسمك",
   },
   {
     icon: WhatsAppIcon,
-    title: "حجوزات عبر واتساب",
-    description: "زبائنك يشوفون أوقات فراغك، يختارون اليوم والساعة ويحجزون مباشرة عبر واتساب.",
+    title: "حجز المواعيد عبر واتساب",
+    description:
+      "يطّلع زبائنك على أوقات عملك المتاحة، يختارون اليوم والساعة، ويحجزون مباشرة عبر واتساب.",
   },
   {
     icon: CalendarDays,
     title: "تنظيم المواعيد",
-    description: "كل الحجوزات تتسجل في لوحة تحكمك، وتقدر تزيد مواعيد زبائنك يدوياً باش ما يصراش تضارب.",
+    description:
+      "تُسجَّل حجوزات صفحتك تلقائياً في لوحة التحكم، ويمكنك إضافة مواعيدك يدوياً لتفادي أي تعارض.",
   },
   {
     icon: ReceiptText,
     title: "فواتير جاهزة للطباعة",
-    description: "أنشئ فواتير احترافية بإسم نشاطك في ثواني وحمّلها PDF أو اطبعها مباشرة.",
+    description:
+      "أنشئ فواتير احترافية باسم نشاطك خلال ثوانٍ، ثم حمّلها بصيغة PDF أو اطبعها مباشرة.",
   },
   {
     icon: QrCode,
     title: "رمز QR لصفحتك",
-    description: "حمّل رمز QR والصقه في محلك أو بطاقة زيارتك، الزبون يسكانيه ويوصل لصفحتك مباشرة.",
+    description:
+      "حمّل رمز QR الخاص بصفحتك وضعه في محلك أو على بطاقة زيارتك، ليصل إليك الزبون بمسحة واحدة.",
   },
   {
     icon: KeyRound,
-    title: "تفعيل بدون بطاقة بنكية",
-    description: "ادفع عند أقرب نقطة بيع واستلم مفتاح تفعيل، أدخله في حسابك وصفحتك تولي مباشرة على النت.",
+    title: "تفعيل دون بطاقة بنكية",
+    description:
+      "ادفع نقداً لدى أقرب نقطة بيع واحصل على مفتاح تفعيل، أدخله في حسابك لتُنشر صفحتك فوراً.",
   },
 ];
 
@@ -55,17 +71,17 @@ const steps = [
   {
     icon: UserPlus,
     title: "سجّل مجاناً",
-    description: "أنشئ حسابك وجهّز صفحتك: معلوماتك، خدماتك وصور أعمالك.",
+    description: "أنشئ حسابك وجهّز صفحتك: معلومات نشاطك، خدماتك، وصور أعمالك.",
   },
   {
     icon: KeyRound,
     title: "فعّل بمفتاح",
-    description: "اشترِ مفتاح تفعيل بـ 4500 دج للسنة من نقاط البيع وأدخله في إعداداتك.",
+    description: `اشترِ مفتاح تفعيل بـ ${PRICE_DZD} دج للسنة من نقاط البيع المعتمدة وأدخله في إعداداتك.`,
   },
   {
     icon: Sparkles,
     title: "انشر واستقبل الزبائن",
-    description: "شارك رابطك أو رمز QR واستقبل الحجوزات مباشرة في واتسابك.",
+    description: "شارك رابط صفحتك أو رمز QR واستقبل الحجوزات مباشرة على واتساب.",
   },
 ];
 
@@ -77,45 +93,76 @@ const demoPages = [
 
 const faqs = [
   {
-    q: "كيفاش نخلص الاشتراك؟",
-    a: "ما تحتاجش بطاقة بنكية. تشري مفتاح تفعيل من نقاط البيع المعتمدة أو من موزعينا بـ 4500 دج، تدخله في إعدادات حسابك وصفحتك تتفعل لمدة سنة كاملة.",
+    q: "كيف أدفع قيمة الاشتراك؟",
+    a: `لا تحتاج إلى بطاقة بنكية. اشترِ مفتاح تفعيل من نقاط البيع المعتمدة أو من موزعينا بـ ${PRICE_DZD} دج، ثم أدخله في إعدادات حسابك لتُفعَّل صفحتك لمدة سنة كاملة.`,
   },
   {
-    q: "واش يصرا كي يحجز زبون من صفحتي؟",
-    a: "الزبون يختار اليوم والساعة من أوقات عملك، يكتب اسمه ويضغط على \"احجز عبر واتساب\". تجيك رسالة واتساب فيها كل التفاصيل، والموعد يتسجل تلقائياً في لوحة تحكمك باش ما يتحجزش نفس الوقت مرتين.",
+    q: "ماذا يحدث عندما يحجز زبون من صفحتي؟",
+    a: 'يختار الزبون اليوم والساعة من أوقات عملك المتاحة، ثم يضغط على "احجز عبر واتساب". تصلك رسالة واتساب بكل التفاصيل، ويُسجَّل الموعد تلقائياً في لوحة التحكم حتى لا يُحجز الوقت نفسه مرتين.',
   },
   {
-    q: "نقدر نجرب قبل ما نخلص؟",
-    a: "نعم، التسجيل مجاني وتقدر تجهز صفحتك كاملة وتشوفها. المفتاح تحتاجه غير باش تنشر الصفحة للعموم.",
+    q: "هل يمكنني التجربة قبل الدفع؟",
+    a: "نعم، التسجيل مجاني ويمكنك تجهيز صفحتك كاملة ومعاينتها. لا تحتاج إلى مفتاح التفعيل إلا لنشر الصفحة للعموم.",
   },
   {
-    q: "واش نحتاج باش نبدا؟",
-    a: "غير هاتفك! اسم نشاطك، وصف قصير، أسعار خدماتك وشوية صور من أعمالك. في 10 دقائق صفحتك جاهزة.",
+    q: "ماذا أحتاج لأبدأ؟",
+    a: "هاتفك فقط: اسم نشاطك، وصف قصير، أسعار خدماتك، وبعض صور أعمالك. خلال دقائق تكون صفحتك جاهزة.",
+  },
+  {
+    q: "هل يمكنني استرجاع أموالي؟",
+    a: "نعم، يمكنك طلب استرجاع كامل للمبلغ خلال 7 أيام من تاريخ تفعيل المفتاح. راجع سياسة الاسترجاع للتفاصيل.",
   },
 ];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: BRAND,
+      url: SITE_URL,
+      email: SUPPORT_EMAIL,
+      description: "منصة جزائرية تتيح للحرفيين إنشاء صفحات احترافية لعرض أعمالهم واستقبال حجوزات الزبائن عبر واتساب.",
+      areaServed: "DZ",
+    },
+    {
+      "@type": "WebSite",
+      name: BRAND,
+      url: SITE_URL,
+      inLanguage: "ar",
+    },
+    {
+      "@type": "Product",
+      name: `اشتراك ${BRAND} السنوي`,
+      description: "صفحة احترافية للحرفي مع حجز المواعيد عبر واتساب، فواتير PDF ورمز QR.",
+      offers: {
+        "@type": "Offer",
+        price: String(PRICE_DZD),
+        priceCurrency: "DZD",
+        availability: "https://schema.org/InStock",
+        url: SITE_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.q,
+        acceptedAnswer: { "@type": "Answer", text: faq.a },
+      })),
+    },
+  ],
+};
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5">
-          <Link href="/" className="flex items-center gap-2">
-            <Hammer className="h-6 w-6 text-primary" />
-            <span className="text-xl font-extrabold">
-              صنعة<span className="text-primary">بيدجز</span>
-            </span>
-          </Link>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <Button variant="ghost" size="sm" className="sm:h-11 sm:px-5" asChild>
-              <Link href="/login">دخول</Link>
-            </Button>
-            <Button size="sm" className="sm:h-11 sm:px-5" asChild>
-              <Link href="/signup">أنشئ صفحتك</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <SiteHeader />
 
       <main className="flex-1">
         {/* Hero */}
@@ -128,14 +175,23 @@ export default function LandingPage() {
               <Sparkles className="h-4 w-4 text-primary" />
               منصة الحرفيين في الجزائر
             </div>
-            <h1 className="animate-rise-in mx-auto max-w-3xl text-balance text-3xl font-extrabold leading-[1.25] sm:text-4xl md:text-5xl md:leading-[1.2]" style={{ animationDelay: "80ms" }}>
-              صنعتك تستاهل صفحة <span className="text-primary">باسمك</span> على الإنترنت
+            <h1
+              className="animate-rise-in mx-auto max-w-3xl text-balance text-3xl font-extrabold leading-[1.25] sm:text-4xl md:text-5xl md:leading-[1.2]"
+              style={{ animationDelay: "80ms" }}
+            >
+              صنعتك تستحق صفحة <span className="text-primary">باسمك</span> على الإنترنت
             </h1>
-            <p className="animate-rise-in mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg" style={{ animationDelay: "160ms" }}>
+            <p
+              className="animate-rise-in mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg"
+              style={{ animationDelay: "160ms" }}
+            >
               نجّار، دهّان، حلواني، مصوّر... أيّاً كانت صنعتك، أنشئ صفحة احترافية تعرض فيها أعمالك
               وخدماتك، واستقبل حجوزات زبائنك مباشرة عبر واتساب.
             </p>
-            <div className="animate-rise-in mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row" style={{ animationDelay: "240ms" }}>
+            <div
+              className="animate-rise-in mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+              style={{ animationDelay: "240ms" }}
+            >
               <Button size="lg" className="w-full sm:w-auto" asChild>
                 <Link href="/signup">أنشئ صفحتك مجاناً</Link>
               </Button>
@@ -143,8 +199,12 @@ export default function LandingPage() {
                 <Link href="/najjar-mohamed">شاهد صفحة تجريبية</Link>
               </Button>
             </div>
-            <p className="animate-rise-in mt-6 inline-block rounded-full bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-soft" dir="ltr" style={{ animationDelay: "320ms" }}>
-              san3apages.com/<span className="font-extrabold text-primary">إسم-صنعتك</span>
+            <p
+              className="animate-rise-in mt-6 inline-block rounded-full bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-soft"
+              dir="ltr"
+              style={{ animationDelay: "320ms" }}
+            >
+              san3apages.com/<span className="font-extrabold text-primary">اسم-صنعتك</span>
             </p>
           </div>
         </section>
@@ -153,7 +213,7 @@ export default function LandingPage() {
         <section className="mx-auto max-w-6xl px-4 py-16">
           <h2 className="text-center text-3xl font-extrabold">كل ما يحتاجه الحرفي في مكان واحد</h2>
           <p className="mt-3 text-center text-muted-foreground">
-            بدون تعقيد، بدون مصاريف زائدة. أدوات بسيطة تخدمك كل يوم.
+            دون تعقيد ودون مصاريف زائدة — أدوات بسيطة تخدمك كل يوم.
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
@@ -173,7 +233,7 @@ export default function LandingPage() {
         {/* How it works */}
         <section className="border-y bg-card">
           <div className="mx-auto max-w-6xl px-4 py-16">
-            <h2 className="text-center text-3xl font-extrabold">كيفاش تخدم؟</h2>
+            <h2 className="text-center text-3xl font-extrabold">كيف تعمل المنصة؟</h2>
             <div className="mt-10 grid gap-8 md:grid-cols-3">
               {steps.map((step, i) => (
                 <div key={step.title} className="relative text-center">
@@ -191,12 +251,12 @@ export default function LandingPage() {
 
         {/* Pricing */}
         <section className="mx-auto max-w-6xl px-4 py-16">
-          <h2 className="text-center text-3xl font-extrabold">سعر واحد، بدون مفاجآت</h2>
-          <Card className="mx-auto mt-10 max-w-md border-2 border-primary shadow-lg">
+          <h2 className="text-center text-3xl font-extrabold">سعر واحد، دون مفاجآت</h2>
+          <Card className="mx-auto mt-10 max-w-md border-2 border-primary shadow-lifted">
             <CardContent className="p-8 text-center">
-              <div className="text-sm font-bold uppercase text-primary">الاشتراك السنوي</div>
+              <div className="text-sm font-bold text-primary">الاشتراك السنوي</div>
               <div className="mt-3 flex items-baseline justify-center gap-2">
-                <span className="text-5xl font-extrabold">4500</span>
+                <span className="text-5xl font-extrabold">{PRICE_DZD}</span>
                 <span className="text-xl font-bold text-muted-foreground">دج / سنة</span>
               </div>
               <p className="mt-2 text-sm text-muted-foreground">أقل من 400 دج في الشهر</p>
@@ -206,8 +266,9 @@ export default function LandingPage() {
                   "حجوزات غير محدودة عبر واتساب",
                   "فواتير PDF غير محدودة",
                   "رمز QR لصفحتك",
-                  "تعديل صفحتك وقتما تشاء",
-                  "دفع نقدي عبر مفتاح تفعيل — بدون بطاقة بنكية",
+                  "تعديل صفحتك في أي وقت",
+                  "دفع نقدي عبر مفتاح تفعيل — دون بطاقة بنكية",
+                  "إمكانية استرجاع المبلغ خلال 7 أيام",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -226,11 +287,13 @@ export default function LandingPage() {
         <section className="border-y bg-card">
           <div className="mx-auto max-w-6xl px-4 py-16">
             <h2 className="text-center text-3xl font-extrabold">صفحات تجريبية</h2>
-            <p className="mt-3 text-center text-muted-foreground">شوف كيفاش تبان صفحتك للزبائن</p>
+            <p className="mt-3 text-center text-muted-foreground">
+              شاهد كيف تظهر صفحتك لزبائنك
+            </p>
             <div className="mt-10 grid gap-5 sm:grid-cols-3">
               {demoPages.map((demo) => (
                 <Link key={demo.slug} href={`/${demo.slug}`}>
-                  <Card className="h-full transition-shadow hover:shadow-md">
+                  <Card className="h-full transition-shadow hover:shadow-lifted">
                     <CardContent className="flex flex-col items-center p-6 text-center">
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-primary">
                         <demo.icon className="h-7 w-7" />
@@ -267,10 +330,10 @@ export default function LandingPage() {
         {/* CTA */}
         <section className="bg-primary text-primary-foreground">
           <div className="mx-auto max-w-6xl px-4 py-16 text-center">
-            <Camera className="mx-auto mb-4 h-10 w-10 opacity-80" />
-            <h2 className="text-3xl font-extrabold">جاهز باش توصل صنعتك لزبائن أكثر؟</h2>
+            <Hammer className="mx-auto mb-4 h-10 w-10 opacity-80" />
+            <h2 className="text-3xl font-extrabold">جاهز لتصل صنعتك إلى زبائن أكثر؟</h2>
             <p className="mx-auto mt-3 max-w-xl opacity-90">
-              سجّل اليوم، جهّز صفحتك في دقائق، وخلي زبائنك يحجزو عندك بضغطة زر.
+              سجّل اليوم، جهّز صفحتك خلال دقائق، ودع زبائنك يحجزون لديك بضغطة زر.
             </p>
             <Button size="lg" variant="secondary" className="mt-7" asChild>
               <Link href="/signup">أنشئ صفحتك الآن</Link>
@@ -279,17 +342,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t bg-card">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted-foreground">
-          <Link href="/" className="flex items-center gap-2 font-extrabold text-foreground">
-            <Hammer className="h-5 w-5 text-primary" />
-            صنعة<span className="text-primary">بيدجز</span>
-          </Link>
-          <p>منصة الحرفيين الجزائريين — san3apages.com</p>
-          <p>© {new Date().getFullYear()} جميع الحقوق محفوظة</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

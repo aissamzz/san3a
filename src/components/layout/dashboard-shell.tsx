@@ -92,9 +92,7 @@ export function DashboardShell({
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Hammer className="h-5 w-5" />
           </span>
-          <span className="text-lg font-extrabold">
-            صنعة<span className="text-primary">بيدجز</span>
-          </span>
+          <span className="text-lg font-extrabold">صنعة</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-1 p-3">
           {nav.map((item) => (
@@ -139,9 +137,7 @@ export function DashboardShell({
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Hammer className="h-4 w-4" />
               </span>
-              <span className="font-extrabold">
-                صنعة<span className="text-primary">بيدجز</span>
-              </span>
+              <span className="font-extrabold">صنعة</span>
             </Link>
             <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="تسجيل الخروج">
               <LogOut className="h-4 w-4" />
