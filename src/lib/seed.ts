@@ -246,7 +246,6 @@ export function buildSeed(): Database {
           { id: "i2", description: "تركيب وتوصيل", qty: 1, price: 15000 },
         ],
         date: new Date().toISOString().slice(0, 10),
-        status: "paid",
         notes: "تم التسليم والتركيب بتاريخ الفاتورة. ضمان سنة على التركيب.",
       },
       {
@@ -258,7 +257,6 @@ export function buildSeed(): Database {
         clientAddress: "",
         items: [{ id: "i1", description: "باب خشب أحمر", qty: 3, price: 28000 }],
         date: new Date().toISOString().slice(0, 10),
-        status: "unpaid",
         notes: "",
       },
     ],

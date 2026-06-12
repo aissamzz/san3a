@@ -3,12 +3,11 @@
 import { Plus, Trash2 } from "lucide-react";
 
 import { formatDZD, invoiceTotal, uid } from "@/lib/store";
-import type { InvoiceItem, InvoiceStatus } from "@/lib/types";
+import type { InvoiceItem } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 export interface InvoiceFormValue {
@@ -16,7 +15,6 @@ export interface InvoiceFormValue {
   clientPhone: string;
   clientAddress: string;
   date: string; // YYYY-MM-DD
-  status: InvoiceStatus;
   notes: string;
   items: InvoiceItem[];
 }
@@ -86,17 +84,6 @@ export function InvoiceForm({
               value={value.date}
               onChange={(e) => onChange({ ...value, date: e.target.value })}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="invoiceStatus">حالة الدفع</Label>
-            <Select
-              id="invoiceStatus"
-              value={value.status}
-              onChange={(e) => onChange({ ...value, status: e.target.value as InvoiceStatus })}
-            >
-              <option value="unpaid">غير مدفوعة</option>
-              <option value="paid">مدفوعة</option>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -200,7 +187,6 @@ export function emptyInvoiceForm(): InvoiceFormValue {
     clientPhone: "",
     clientAddress: "",
     date: new Date().toISOString().slice(0, 10),
-    status: "unpaid",
     notes: "",
     items: [{ id: uid(), description: "", qty: 1, price: 0 }],
   };
