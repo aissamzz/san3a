@@ -88,7 +88,7 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12">
         {/* Header */}
-        <div className="-mt-12 mb-8 flex flex-col items-center text-center">
+        <div className="relative z-10 -mt-12 mb-8 flex flex-col items-center text-center">
           <div className="h-24 w-24 overflow-hidden rounded-2xl border-4 border-background bg-card shadow-md">
             {page.avatarUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
