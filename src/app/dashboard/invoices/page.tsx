@@ -15,8 +15,8 @@ export default function InvoicesPage() {
   const { page, loaded } = useMyPage();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
-  const refresh = useCallback(() => {
-    if (page) setInvoices(getInvoices(page.id));
+  const refresh = useCallback(async () => {
+    if (page) setInvoices(await getInvoices(page.id));
   }, [page]);
 
   useEffect(() => {
@@ -90,9 +90,9 @@ export default function InvoicesPage() {
                     variant="ghost"
                     size="sm"
                     className="ms-auto text-destructive"
-                    onClick={() => {
-                      deleteInvoice(invoice.id);
-                      refresh();
+                    onClick={async () => {
+                      await deleteInvoice(invoice.id);
+                      await refresh();
                       toast.success("تم حذف الفاتورة");
                     }}
                   >

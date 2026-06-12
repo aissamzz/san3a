@@ -5,7 +5,7 @@ import { Check, Copy, KeyRound, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { generateKeys, getAllKeys, getPageById } from "@/lib/store";
-import type { ActivationKey } from "@/lib/types";
+import type { ActivationKey, Page } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,22 +22,36 @@ import {
 
 export default function AdminKeysPage() {
   const [keys, setKeys] = useState<ActivationKey[]>([]);
+  const [usedByPages, setUsedByPages] = useState<Record<string, Page>>({});
   const [count, setCount] = useState(5);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const refresh = useCallback(() => setKeys(getAllKeys()), []);
+  const refresh = useCallback(async () => setKeys(await getAllKeys()), []);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  const generate = () => {
+  useEffect(() => {
+    const pageIds = Array.from(new Set(keys.map((key) => key.usedByPageId).filter(Boolean))) as string[];
+    if (pageIds.length === 0) {
+      setUsedByPages({});
+      return;
+    }
+    void Promise.all(pageIds.map(async (id) => [id, await getPageById(id)] as const)).then((entries) => {
+      setUsedByPages(
+        Object.fromEntries(entries.filter((entry): entry is readonly [string, Page] => entry[1] !== null))
+      );
+    });
+  }, [keys]);
+
+  const generate = async () => {
     if (count < 1 || count > 100) {
       toast.error("اختر عدداً بين 1 و 100");
       return;
     }
-    const created = generateKeys(count);
-    refresh();
+    const created = await generateKeys(count);
+    await refresh();
     toast.success(`تم توليد ${created.length} مفتاح`);
   };
 
@@ -97,7 +111,7 @@ export default function AdminKeysPage() {
           </TableHeader>
           <TableBody>
             {keys.map((key) => {
-              const usedBy = key.usedByPageId ? getPageById(key.usedByPageId) : null;
+              const usedBy = key.usedByPageId ? usedByPages[key.usedByPageId] : null;
               return (
                 <TableRow key={key.id}>
                   <TableCell dir="ltr" className="font-mono text-sm">

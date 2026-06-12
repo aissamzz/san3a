@@ -17,7 +17,7 @@ export default function NewInvoicePage() {
 
   if (!loaded || !page) return null;
 
-  const create = () => {
+  const create = async () => {
     if (!form.clientName.trim()) {
       toast.error("أدخل اسم الزبون");
       return;
@@ -27,7 +27,7 @@ export default function NewInvoicePage() {
       toast.error("أضف على الأقل خدمة أو منتج واحد");
       return;
     }
-    const invoice = addInvoice({
+    const invoice = await addInvoice({
       pageId: page.id,
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
@@ -36,6 +36,10 @@ export default function NewInvoicePage() {
       notes: form.notes.trim(),
       items: validItems,
     });
+    if (!invoice) {
+      toast.error("تعذّر إنشاء الفاتورة");
+      return;
+    }
     toast.success("تم إنشاء الفاتورة");
     router.push(`/dashboard/invoices/${invoice.id}`);
   };

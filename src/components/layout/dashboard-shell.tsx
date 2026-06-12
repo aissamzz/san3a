@@ -54,7 +54,12 @@ export function DashboardShell({
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    const session = getSession();
+    let cancelled = false;
+
+    async function checkSession() {
+      const session = await getSession();
+      if (cancelled) return;
+
     if (!session) {
       router.replace("/login");
       return;
@@ -65,6 +70,12 @@ export function DashboardShell({
     }
     setProfile(session);
     setChecked(true);
+    }
+
+    checkSession();
+    return () => {
+      cancelled = true;
+    };
   }, [router, role]);
 
   if (!checked || !profile) {
@@ -79,8 +90,8 @@ export function DashboardShell({
   const isActive = (href: string) =>
     href === "/dashboard" || href === "/admin" ? pathname === href : pathname.startsWith(href);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 

@@ -1,14 +1,8 @@
-// Mock data layer backed by localStorage.
-// This module is the single integration point for the future Supabase
-// migration: every function here maps to a query/mutation on a table
-// (see src/lib/types.ts), and auth functions map to Supabase Auth.
-
-import { buildSeed } from "./seed";
+import { getSupabase } from "./supabase";
 import type {
   ActivationKey,
   Appointment,
   AppointmentStatus,
-  Database,
   Invoice,
   InvoiceItem,
   Page,
@@ -16,11 +10,83 @@ import type {
   WeeklyHours,
 } from "./types";
 
-// Bump the version when the seed shape changes — old browser data is discarded.
-const DB_KEY = "san3a_db_v2";
-const SESSION_KEY = "san3a_session_v1";
+type PageRow = {
+  id: string;
+  user_id: string;
+  slug: string;
+  business_name: string;
+  craft: string | null;
+  city: string | null;
+  description: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  avatar_url: string | null;
+  cover_url: string | null;
+  services: Page["services"] | null;
+  gallery: Page["gallery"] | null;
+  hours: WeeklyHours | null;
+  activated: boolean;
+  activated_until: string | null;
+  suspended: boolean;
+  created_at: string;
+};
+
+type ProfileRow = {
+  id: string;
+  email: string;
+  name: string;
+  role: Profile["role"];
+  created_at: string;
+};
+
+type AppointmentRow = {
+  id: string;
+  page_id: string;
+  client_name: string;
+  client_phone: string | null;
+  service_name: string | null;
+  date: string;
+  time: string;
+  status: AppointmentStatus;
+  source: Appointment["source"];
+  created_at: string;
+};
+
+type InvoiceRow = {
+  id: string;
+  page_id: string;
+  number: string;
+  client_name: string;
+  client_phone: string | null;
+  client_address: string | null;
+  items: InvoiceItem[];
+  date: string;
+  notes: string | null;
+};
+
+type ActivationKeyRow = {
+  id: string;
+  code: string;
+  status: ActivationKey["status"];
+  used_by_page_id: string | null;
+  used_at: string | null;
+  created_at: string;
+};
+
+const defaultHours: WeeklyHours = {
+  0: { enabled: true, from: "09:00", to: "17:00" },
+  1: { enabled: true, from: "09:00", to: "17:00" },
+  2: { enabled: true, from: "09:00", to: "17:00" },
+  3: { enabled: true, from: "09:00", to: "17:00" },
+  4: { enabled: true, from: "09:00", to: "17:00" },
+  5: { enabled: false, from: "09:00", to: "17:00" },
+  6: { enabled: false, from: "09:00", to: "17:00" },
+};
 
 export function uid() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
@@ -28,114 +94,186 @@ export function formatDZD(amount: number) {
   return `${amount.toLocaleString("ar-DZ")} دج`;
 }
 
-function loadDb(): Database {
-  if (typeof window === "undefined") return buildSeed();
-  const raw = localStorage.getItem(DB_KEY);
-  if (!raw) {
-    const seed = buildSeed();
-    localStorage.setItem(DB_KEY, JSON.stringify(seed));
-    return seed;
-  }
-  try {
-    return JSON.parse(raw) as Database;
-  } catch {
-    const seed = buildSeed();
-    localStorage.setItem(DB_KEY, JSON.stringify(seed));
-    return seed;
-  }
+function toProfile(row: ProfileRow): Profile {
+  return {
+    id: row.id,
+    email: row.email,
+    password: "",
+    name: row.name,
+    role: row.role,
+    createdAt: row.created_at,
+  };
 }
 
-function saveDb(db: Database) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+function toPage(row: PageRow): Page {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    slug: row.slug,
+    businessName: row.business_name,
+    craft: row.craft ?? "",
+    city: row.city ?? "",
+    description: row.description ?? "",
+    phone: row.phone ?? "",
+    whatsapp: row.whatsapp ?? "",
+    avatarUrl: row.avatar_url ?? "",
+    coverUrl: row.cover_url ?? "",
+    services: row.services ?? [],
+    gallery: row.gallery ?? [],
+    hours: row.hours ?? defaultHours,
+    activated: row.activated,
+    activatedUntil: row.activated_until,
+    suspended: row.suspended,
+    createdAt: row.created_at,
+  };
 }
 
-export function resetDemoData() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(DB_KEY);
-  loadDb();
+function fromPage(page: Page) {
+  return {
+    id: page.id,
+    user_id: page.userId,
+    slug: page.slug,
+    business_name: page.businessName,
+    craft: page.craft,
+    city: page.city,
+    description: page.description,
+    phone: page.phone,
+    whatsapp: page.whatsapp,
+    avatar_url: page.avatarUrl,
+    cover_url: page.coverUrl,
+    services: page.services,
+    gallery: page.gallery,
+    hours: page.hours,
+    activated: page.activated,
+    activated_until: page.activatedUntil,
+    suspended: page.suspended,
+    created_at: page.createdAt,
+  };
+}
+
+function toAppointment(row: AppointmentRow): Appointment {
+  return {
+    id: row.id,
+    pageId: row.page_id,
+    clientName: row.client_name,
+    clientPhone: row.client_phone ?? "",
+    serviceName: row.service_name ?? "",
+    date: row.date,
+    time: row.time,
+    status: row.status,
+    source: row.source,
+    createdAt: row.created_at,
+  };
+}
+
+function toInvoice(row: InvoiceRow): Invoice {
+  return {
+    id: row.id,
+    pageId: row.page_id,
+    number: row.number,
+    clientName: row.client_name,
+    clientPhone: row.client_phone ?? "",
+    clientAddress: row.client_address ?? "",
+    items: row.items ?? [],
+    date: row.date,
+    notes: row.notes ?? "",
+  };
+}
+
+function toKey(row: ActivationKeyRow): ActivationKey {
+  return {
+    id: row.id,
+    code: row.code,
+    status: row.status,
+    usedByPageId: row.used_by_page_id,
+    usedAt: row.used_at,
+    createdAt: row.created_at,
+  };
 }
 
 // ---------- Auth ----------
 
-export function login(email: string, password: string): Profile | null {
-  const db = loadDb();
-  const profile = db.profiles.find(
-    (p) => p.email.toLowerCase() === email.trim().toLowerCase() && p.password === password
-  );
-  if (!profile) return null;
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: profile.id }));
-  return profile;
-}
-
-export function signup(name: string, email: string, password: string): { ok: boolean; message: string } {
-  const db = loadDb();
-  if (db.profiles.some((p) => p.email.toLowerCase() === email.trim().toLowerCase())) {
-    return { ok: false, message: "هذا البريد الإلكتروني مسجّل من قبل" };
-  }
-  const userId = uid();
-  const profile: Profile = {
-    id: userId,
+export async function login(email: string, password: string): Promise<Profile | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim(),
     password,
+  });
+  if (error || !data.user) return null;
+  return getProfile(data.user.id);
+}
+
+export async function signup(name: string, email: string, password: string): Promise<{ ok: boolean; message: string }> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+  });
+  if (error || !data.user) {
+    return { ok: false, message: error?.message ?? "تعذّر إنشاء الحساب" };
+  }
+
+  const now = new Date().toISOString();
+  const profile = {
+    id: data.user.id,
+    email: email.trim(),
     name: name.trim(),
-    role: "user",
-    createdAt: new Date().toISOString(),
+    role: "user" as const,
+    created_at: now,
   };
-  const defaultHours: WeeklyHours = {
-    0: { enabled: true, from: "09:00", to: "17:00" },
-    1: { enabled: true, from: "09:00", to: "17:00" },
-    2: { enabled: true, from: "09:00", to: "17:00" },
-    3: { enabled: true, from: "09:00", to: "17:00" },
-    4: { enabled: true, from: "09:00", to: "17:00" },
-    5: { enabled: false, from: "09:00", to: "17:00" },
-    6: { enabled: false, from: "09:00", to: "17:00" },
-  };
-  const page: Page = {
+  const slug = await uniqueSlug(name);
+  const page = {
     id: uid(),
-    userId,
-    slug: uniqueSlug(db, name),
-    businessName: name.trim(),
+    user_id: data.user.id,
+    slug,
+    business_name: name.trim(),
     craft: "",
     city: "الجزائر",
     description: "",
     phone: "",
     whatsapp: "",
-    avatarUrl: "",
-    coverUrl: "",
+    avatar_url: "",
+    cover_url: "",
     services: [],
     gallery: [],
     hours: defaultHours,
     activated: false,
-    activatedUntil: null,
+    activated_until: null,
     suspended: false,
-    createdAt: new Date().toISOString(),
+    created_at: now,
   };
-  db.profiles.push(profile);
-  db.pages.push(page);
-  saveDb(db);
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ userId }));
+
+  const { error: profileError } = await supabase.from("profiles").insert(profile);
+  const { error: pageError } = await supabase.from("pages").insert(page);
+
+  if (profileError || pageError) {
+    return { ok: false, message: profileError?.message ?? pageError?.message ?? "تعذّر إنشاء الصفحة" };
+  }
+
   return { ok: true, message: "تم إنشاء الحساب بنجاح" };
 }
 
-export function logout() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(SESSION_KEY);
+export async function logout() {
+  await getSupabase().auth.signOut();
 }
 
-export function getSession(): Profile | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(SESSION_KEY);
-  if (!raw) return null;
-  try {
-    const { userId } = JSON.parse(raw) as { userId: string };
-    return loadDb().profiles.find((p) => p.id === userId) ?? null;
-  } catch {
-    return null;
-  }
+export async function getSession(): Promise<Profile | null> {
+  const { data } = await getSupabase().auth.getUser();
+  if (!data.user) return null;
+  return getProfile(data.user.id);
 }
 
-function uniqueSlug(db: Database, name: string) {
+async function getProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await getSupabase()
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle<ProfileRow>();
+  if (error || !data) return null;
+  return toProfile(data);
+}
+
+async function uniqueSlug(name: string) {
   const base =
     name
       .trim()
@@ -144,140 +282,202 @@ function uniqueSlug(db: Database, name: string) {
       .replace(/^-+|-+$/g, "") || "page";
   let slug = base;
   let i = 1;
-  while (db.pages.some((p) => p.slug === slug)) {
+
+  while (await slugExists(slug)) {
     slug = `${base}-${++i}`;
   }
   return slug;
 }
 
+async function slugExists(slug: string) {
+  const { data } = await getSupabase().from("pages").select("id").eq("slug", slug).maybeSingle();
+  return !!data;
+}
+
 // ---------- Pages ----------
 
-export function getPageBySlug(slug: string): Page | null {
-  return loadDb().pages.find((p) => p.slug === slug) ?? null;
+export async function getPageBySlug(slug: string): Promise<Page | null> {
+  const { data, error } = await getSupabase()
+    .from("pages")
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle<PageRow>();
+  if (error || !data) return null;
+  return toPage(data);
 }
 
-export function getPageByUserId(userId: string): Page | null {
-  return loadDb().pages.find((p) => p.userId === userId) ?? null;
+export async function getPageByUserId(userId: string): Promise<Page | null> {
+  const { data, error } = await getSupabase()
+    .from("pages")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle<PageRow>();
+  if (error || !data) return null;
+  return toPage(data);
 }
 
-export function updatePage(page: Page): { ok: boolean; message: string } {
-  const db = loadDb();
-  if (db.pages.some((p) => p.slug === page.slug && p.id !== page.id)) {
+export async function updatePage(page: Page): Promise<{ ok: boolean; message: string }> {
+  const { data: existing } = await getSupabase()
+    .from("pages")
+    .select("id")
+    .eq("slug", page.slug)
+    .neq("id", page.id)
+    .maybeSingle();
+  if (existing) {
     return { ok: false, message: "هذا الرابط مستعمل من طرف صفحة أخرى" };
   }
-  const idx = db.pages.findIndex((p) => p.id === page.id);
-  if (idx === -1) return { ok: false, message: "الصفحة غير موجودة" };
-  db.pages[idx] = page;
-  saveDb(db);
+
+  const { error } = await getSupabase().from("pages").update(fromPage(page)).eq("id", page.id);
+  if (error) return { ok: false, message: error.message };
   return { ok: true, message: "تم حفظ التغييرات" };
 }
 
 // ---------- Appointments ----------
 
-export function getAppointments(pageId: string): Appointment[] {
-  return loadDb()
-    .appointments.filter((a) => a.pageId === pageId)
-    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+export async function getAppointments(pageId: string): Promise<Appointment[]> {
+  const { data, error } = await getSupabase()
+    .from("appointments")
+    .select("*")
+    .eq("page_id", pageId)
+    .order("date", { ascending: true })
+    .order("time", { ascending: true })
+    .returns<AppointmentRow[]>();
+  if (error || !data) return [];
+  return data.map(toAppointment);
 }
 
-export function addAppointment(
-  data: Omit<Appointment, "id" | "createdAt">
-): Appointment {
-  const db = loadDb();
-  const appointment: Appointment = {
-    ...data,
-    id: uid(),
-    createdAt: new Date().toISOString(),
-  };
-  db.appointments.push(appointment);
-  saveDb(db);
-  return appointment;
+export async function addAppointment(data: Omit<Appointment, "id" | "createdAt">): Promise<Appointment | null> {
+  const { data: created, error } = await getSupabase()
+    .from("appointments")
+    .insert({
+      page_id: data.pageId,
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      service_name: data.serviceName,
+      date: data.date,
+      time: data.time,
+      status: data.status,
+      source: data.source,
+    })
+    .select("*")
+    .single<AppointmentRow>();
+  if (error || !created) return null;
+  return toAppointment(created);
 }
 
-export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
-  const db = loadDb();
-  const a = db.appointments.find((x) => x.id === id);
-  if (a) {
-    a.status = status;
-    saveDb(db);
-  }
+export async function updateAppointmentStatus(id: string, status: AppointmentStatus) {
+  await getSupabase().from("appointments").update({ status }).eq("id", id);
 }
 
-export function updateAppointment(id: string, data: Partial<Omit<Appointment, "id" | "pageId" | "createdAt">>) {
-  const db = loadDb();
-  const a = db.appointments.find((x) => x.id === id);
-  if (a) {
-    Object.assign(a, data);
-    saveDb(db);
-  }
+export async function updateAppointment(
+  id: string,
+  data: Partial<Omit<Appointment, "id" | "pageId" | "createdAt">>
+) {
+  await getSupabase()
+    .from("appointments")
+    .update({
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      service_name: data.serviceName,
+      date: data.date,
+      time: data.time,
+      status: data.status,
+      source: data.source,
+    })
+    .eq("id", id);
 }
 
-export function deleteAppointment(id: string) {
-  const db = loadDb();
-  db.appointments = db.appointments.filter((a) => a.id !== id);
-  saveDb(db);
+export async function deleteAppointment(id: string) {
+  await getSupabase().from("appointments").delete().eq("id", id);
 }
 
 /** Times already taken (pending or confirmed) for a page on a given day. */
-export function getBookedTimes(pageId: string, date: string): string[] {
-  return loadDb()
-    .appointments.filter(
-      (a) => a.pageId === pageId && a.date === date && a.status !== "cancelled"
-    )
-    .map((a) => a.time);
+export async function getBookedTimes(pageId: string, date: string): Promise<string[]> {
+  const { data, error } = await getSupabase()
+    .rpc("get_booked_times", { p_page_id: pageId, p_date: date })
+    .returns<Array<{ time: string }>>();
+  if (error || !data) return [];
+  return (data as Array<{ time: string }>).map((row) => row.time);
 }
 
 // ---------- Invoices ----------
 
-export function getInvoices(pageId: string): Invoice[] {
-  return loadDb()
-    .invoices.filter((i) => i.pageId === pageId)
-    .sort((a, b) => b.date.localeCompare(a.date));
+export async function getInvoices(pageId: string): Promise<Invoice[]> {
+  const { data, error } = await getSupabase()
+    .from("invoices")
+    .select("*")
+    .eq("page_id", pageId)
+    .order("date", { ascending: false })
+    .returns<InvoiceRow[]>();
+  if (error || !data) return [];
+  return data.map(toInvoice);
 }
 
-export function getInvoice(id: string): Invoice | null {
-  return loadDb().invoices.find((i) => i.id === id) ?? null;
+export async function getInvoice(id: string): Promise<Invoice | null> {
+  const { data, error } = await getSupabase()
+    .from("invoices")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle<InvoiceRow>();
+  if (error || !data) return null;
+  return toInvoice(data);
 }
 
-export function nextInvoiceNumber(pageId: string): string {
+export async function nextInvoiceNumber(pageId: string): Promise<string> {
   const year = new Date().getFullYear();
-  const count = loadDb().invoices.filter(
-    (i) => i.pageId === pageId && i.number.includes(`-${year}-`)
-  ).length;
-  return `INV-${year}-${String(count + 1).padStart(3, "0")}`;
+  const { count } = await getSupabase()
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("page_id", pageId)
+    .like("number", `INV-${year}-%`);
+  return `INV-${year}-${String((count ?? 0) + 1).padStart(3, "0")}`;
 }
 
-export function addInvoice(
+export async function addInvoice(
   data: Omit<Invoice, "id" | "number"> & { number?: string }
-): Invoice {
-  const db = loadDb();
-  const invoice: Invoice = {
-    ...data,
-    number: data.number ?? nextInvoiceNumber(data.pageId),
-    id: uid(),
-  };
-  db.invoices.push(invoice);
-  saveDb(db);
-  return invoice;
+): Promise<Invoice | null> {
+  const number = data.number ?? (await nextInvoiceNumber(data.pageId));
+  const { data: created, error } = await getSupabase()
+    .from("invoices")
+    .insert({
+      page_id: data.pageId,
+      number,
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      client_address: data.clientAddress,
+      items: data.items,
+      date: data.date,
+      notes: data.notes,
+    })
+    .select("*")
+    .single<InvoiceRow>();
+  if (error || !created) return null;
+  return toInvoice(created);
 }
 
-export function updateInvoice(
+export async function updateInvoice(
   id: string,
   data: Partial<Pick<Invoice, "clientName" | "clientPhone" | "clientAddress" | "items" | "date" | "notes">>
-) {
-  const db = loadDb();
-  const invoice = db.invoices.find((i) => i.id === id);
-  if (invoice) {
-    Object.assign(invoice, data);
-    saveDb(db);
-  }
-  return invoice ?? null;
+): Promise<Invoice | null> {
+  const { data: updated, error } = await getSupabase()
+    .from("invoices")
+    .update({
+      client_name: data.clientName,
+      client_phone: data.clientPhone,
+      client_address: data.clientAddress,
+      items: data.items,
+      date: data.date,
+      notes: data.notes,
+    })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle<InvoiceRow>();
+  if (error || !updated) return null;
+  return toInvoice(updated);
 }
 
-export function deleteInvoice(id: string) {
-  const db = loadDb();
-  db.invoices = db.invoices.filter((i) => i.id !== id);
-  saveDb(db);
+export async function deleteInvoice(id: string) {
+  await getSupabase().from("invoices").delete().eq("id", id);
 }
 
 export function invoiceTotal(items: InvoiceItem[]) {
@@ -286,12 +486,17 @@ export function invoiceTotal(items: InvoiceItem[]) {
 
 // ---------- Activation ----------
 
-export function activateWithKey(pageId: string, code: string): { ok: boolean; message: string } {
-  const db = loadDb();
-  const key = db.keys.find((k) => k.code.trim().toUpperCase() === code.trim().toUpperCase());
-  if (!key) return { ok: false, message: "مفتاح التفعيل غير صحيح" };
+export async function activateWithKey(pageId: string, code: string): Promise<{ ok: boolean; message: string }> {
+  const supabase = getSupabase();
+  const { data: key, error: keyError } = await supabase
+    .from("activation_keys")
+    .select("*")
+    .eq("code", code.trim().toUpperCase())
+    .maybeSingle<ActivationKeyRow>();
+  if (keyError || !key) return { ok: false, message: "مفتاح التفعيل غير صحيح" };
   if (key.status === "used") return { ok: false, message: "هذا المفتاح مستعمل من قبل" };
-  const page = db.pages.find((p) => p.id === pageId);
+
+  const page = await getPageById(pageId);
   if (!page) return { ok: false, message: "الصفحة غير موجودة" };
 
   const base =
@@ -299,14 +504,26 @@ export function activateWithKey(pageId: string, code: string): { ok: boolean; me
       ? new Date(page.activatedUntil)
       : new Date();
   base.setFullYear(base.getFullYear() + 1);
+  const activatedUntil = base.toISOString().slice(0, 10);
 
-  page.activated = true;
-  page.activatedUntil = base.toISOString().slice(0, 10);
-  key.status = "used";
-  key.usedByPageId = page.id;
-  key.usedAt = new Date().toISOString();
-  saveDb(db);
-  return { ok: true, message: `تم تفعيل صفحتك حتى ${page.activatedUntil}` };
+  const { error: pageError } = await supabase
+    .from("pages")
+    .update({ activated: true, activated_until: activatedUntil })
+    .eq("id", pageId);
+  const { error: updateKeyError } = await supabase
+    .from("activation_keys")
+    .update({
+      status: "used",
+      used_by_page_id: pageId,
+      used_at: new Date().toISOString(),
+    })
+    .eq("id", key.id)
+    .eq("status", "unused");
+
+  if (pageError || updateKeyError) {
+    return { ok: false, message: pageError?.message ?? updateKeyError?.message ?? "تعذّر تفعيل الصفحة" };
+  }
+  return { ok: true, message: `تم تفعيل صفحتك حتى ${activatedUntil}` };
 }
 
 // ---------- Admin ----------
@@ -316,65 +533,90 @@ export interface AdminUserRow {
   page: Page | null;
 }
 
-export function getAllUsers(): AdminUserRow[] {
-  const db = loadDb();
-  return db.profiles
-    .filter((p) => p.role === "user")
-    .map((profile) => ({
-      profile,
-      page: db.pages.find((pg) => pg.userId === profile.id) ?? null,
-    }));
+export async function getAllUsers(): Promise<AdminUserRow[]> {
+  const { data: profiles, error } = await getSupabase()
+    .from("profiles")
+    .select("*")
+    .eq("role", "user")
+    .order("created_at", { ascending: false })
+    .returns<ProfileRow[]>();
+  if (error || !profiles) return [];
+
+  const { data: pages } = await getSupabase().from("pages").select("*").returns<PageRow[]>();
+  const pagesByUser = new Map((pages ?? []).map((page) => [page.user_id, toPage(page)]));
+  return profiles.map((profile) => ({
+    profile: toProfile(profile),
+    page: pagesByUser.get(profile.id) ?? null,
+  }));
 }
 
-export function getAllKeys(): ActivationKey[] {
-  return [...loadDb().keys].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export async function getAllKeys(): Promise<ActivationKey[]> {
+  const { data, error } = await getSupabase()
+    .from("activation_keys")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .returns<ActivationKeyRow[]>();
+  if (error || !data) return [];
+  return data.map(toKey);
 }
 
-export function getPageById(id: string): Page | null {
-  return loadDb().pages.find((p) => p.id === id) ?? null;
+export async function getPageById(id: string): Promise<Page | null> {
+  const { data, error } = await getSupabase()
+    .from("pages")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle<PageRow>();
+  if (error || !data) return null;
+  return toPage(data);
 }
 
-export function generateKeys(count: number): ActivationKey[] {
-  const db = loadDb();
+export async function generateKeys(count: number): Promise<ActivationKey[]> {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ123456789";
   const block = () =>
     Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-  const created: ActivationKey[] = [];
-  for (let i = 0; i < count; i++) {
-    created.push({
-      id: uid(),
-      code: `SP-${block()}-${block()}-${block()}`,
-      status: "unused",
-      usedByPageId: null,
-      usedAt: null,
-      createdAt: new Date().toISOString(),
-    });
-  }
-  db.keys.push(...created);
-  saveDb(db);
-  return created;
+  const rows = Array.from({ length: count }, () => ({
+    code: `SP-${block()}-${block()}-${block()}`,
+    status: "unused" as const,
+  }));
+  const { data, error } = await getSupabase()
+    .from("activation_keys")
+    .insert(rows)
+    .select("*")
+    .returns<ActivationKeyRow[]>();
+  if (error || !data) return [];
+  return data.map(toKey);
 }
 
-export function toggleSuspend(pageId: string) {
-  const db = loadDb();
-  const page = db.pages.find((p) => p.id === pageId);
-  if (page) {
-    page.suspended = !page.suspended;
-    saveDb(db);
-  }
+export async function toggleSuspend(pageId: string) {
+  const page = await getPageById(pageId);
+  if (!page) return;
+  await getSupabase().from("pages").update({ suspended: !page.suspended }).eq("id", pageId);
 }
 
-export function getAdminStats() {
-  const db = loadDb();
-  const users = db.profiles.filter((p) => p.role === "user").length;
+export async function getAdminStats() {
+  const supabase = getSupabase();
   const today = new Date().toISOString().slice(0, 10);
-  const active = db.pages.filter(
-    (p) => p.activated && p.activatedUntil && p.activatedUntil >= today && !p.suspended
-  ).length;
-  const inactive = db.pages.length - active;
-  const keysUsed = db.keys.filter((k) => k.status === "used").length;
-  const keysUnused = db.keys.length - keysUsed;
-  return { users, active, inactive, keysUsed, keysUnused, totalKeys: db.keys.length };
+  const [{ count: users }, { data: pages }, { count: keysUsed }, { count: totalKeys }] =
+    await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "user"),
+      supabase.from("pages").select("activated,activated_until,suspended").returns<
+        Array<{ activated: boolean; activated_until: string | null; suspended: boolean }>
+      >(),
+      supabase.from("activation_keys").select("id", { count: "exact", head: true }).eq("status", "used"),
+      supabase.from("activation_keys").select("id", { count: "exact", head: true }),
+    ]);
+
+  const active =
+    pages?.filter((p) => p.activated && p.activated_until && p.activated_until >= today && !p.suspended).length ?? 0;
+  const inactive = (pages?.length ?? 0) - active;
+  return {
+    users: users ?? 0,
+    active,
+    inactive,
+    keysUsed: keysUsed ?? 0,
+    keysUnused: (totalKeys ?? 0) - (keysUsed ?? 0),
+    totalKeys: totalKeys ?? 0,
+  };
 }
 
 // ---------- Availability helpers ----------
@@ -390,13 +632,13 @@ export function isPageLive(page: Page): boolean {
 }
 
 /** Hourly slots for a page on a given date (YYYY-MM-DD), excluding booked ones. */
-export function getAvailableSlots(page: Page, date: string): string[] {
+export async function getAvailableSlots(page: Page, date: string): Promise<string[]> {
   const day = new Date(date + "T00:00:00").getDay();
   const hours = page.hours[day];
   if (!hours || !hours.enabled) return [];
   const fromH = parseInt(hours.from.slice(0, 2), 10);
   const toH = parseInt(hours.to.slice(0, 2), 10);
-  const booked = new Set(getBookedTimes(page.id, date));
+  const booked = new Set(await getBookedTimes(page.id, date));
   const slots: string[] = [];
   for (let h = fromH; h < toH; h++) {
     const t = `${String(h).padStart(2, "0")}:00`;

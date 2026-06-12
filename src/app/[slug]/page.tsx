@@ -22,12 +22,13 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
 
   useEffect(() => {
     setIsPreview(new URLSearchParams(window.location.search).get("preview") === "1");
-    const found = getPageBySlug(slug);
-    setPage(found);
-    setLoaded(true);
-    if (found) {
-      document.title = `${found.businessName}${found.craft ? ` – ${found.craft}` : ""} في ${found.city} | صنعة`;
-    }
+    void getPageBySlug(slug).then((found) => {
+      setPage(found);
+      setLoaded(true);
+      if (found) {
+        document.title = `${found.businessName}${found.craft ? ` – ${found.craft}` : ""} في ${found.city} | صنعة`;
+      }
+    });
   }, [slug]);
 
   const share = async () => {

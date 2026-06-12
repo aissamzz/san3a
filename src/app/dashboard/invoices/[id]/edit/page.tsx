@@ -19,7 +19,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const invoice = getInvoice(id);
+    void getInvoice(id).then((invoice) => {
     if (!invoice) {
       setNotFound(true);
       return;
@@ -31,6 +31,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       date: invoice.date.slice(0, 10),
       notes: invoice.notes ?? "",
       items: invoice.items,
+    });
     });
   }, [id]);
 
@@ -49,7 +50,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
 
   if (!form) return null;
 
-  const save = () => {
+  const save = async () => {
     if (!form.clientName.trim()) {
       toast.error("أدخل اسم الزبون");
       return;
@@ -59,7 +60,7 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       toast.error("أضف على الأقل خدمة أو منتج واحد");
       return;
     }
-    updateInvoice(id, {
+    const invoice = await updateInvoice(id, {
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
       clientAddress: form.clientAddress.trim(),
@@ -67,6 +68,10 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
       notes: form.notes.trim(),
       items: validItems,
     });
+    if (!invoice) {
+      toast.error("تعذّر حفظ التعديلات");
+      return;
+    }
     toast.success("تم حفظ التعديلات");
     router.push(`/dashboard/invoices/${id}`);
   };

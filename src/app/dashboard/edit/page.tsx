@@ -35,7 +35,7 @@ export default function EditPage() {
   const set = <K extends keyof Page>(key: K, value: Page[K]) =>
     setDraft((d) => (d ? { ...d, [key]: value } : d));
 
-  const save = () => {
+  const save = async () => {
     if (!draft.businessName.trim()) {
       toast.error("اسم النشاط إجباري");
       return;
@@ -44,7 +44,7 @@ export default function EditPage() {
       toast.error("الرابط يجب أن يحتوي فقط على حروف لاتينية صغيرة، أرقام و -");
       return;
     }
-    const result = updatePage(draft);
+    const result = await updatePage(draft);
     if (result.ok) toast.success(result.message);
     else toast.error(result.message);
   };

@@ -1,10 +1,7 @@
 "use client";
 
-import { RefreshCw, Settings2 } from "lucide-react";
-import { toast } from "sonner";
+import { Database, Settings2 } from "lucide-react";
 
-import { resetDemoData } from "@/lib/store";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,22 +34,16 @@ export default function AdminSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">بيانات تجريبية</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Database className="h-5 w-5 text-primary" />
+            قاعدة البيانات
+          </CardTitle>
           <CardDescription>
-            إعادة ضبط جميع البيانات التجريبية المخزنة في هذا المتصفح (مستخدمون، صفحات، مفاتيح...)
+            البيانات مرتبطة الآن بجداول Supabase. استعمل لوحة Supabase لإدارة النسخ الاحتياطي، RLS، ومفاتيح الخدمة.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button
-            variant="outline"
-            onClick={() => {
-              resetDemoData();
-              toast.success("تمت إعادة ضبط البيانات التجريبية");
-            }}
-          >
-            <RefreshCw className="h-4 w-4" />
-            إعادة ضبط البيانات
-          </Button>
+        <CardContent className="text-sm text-muted-foreground">
+          لا توجد بيانات محلية لإعادة ضبطها.
         </CardContent>
       </Card>
     </div>

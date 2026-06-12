@@ -8,13 +8,13 @@ import { getAdminStats } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-type Stats = ReturnType<typeof getAdminStats>;
+type Stats = Awaited<ReturnType<typeof getAdminStats>>;
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    setStats(getAdminStats());
+    void getAdminStats().then(setStats);
   }, []);
 
   if (!stats) return null;

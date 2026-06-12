@@ -35,10 +35,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (page) {
       const today = new Date().toISOString().slice(0, 10);
-      setAppointments(
-        getAppointments(page.id).filter((a) => a.date >= today && a.status !== "cancelled").slice(0, 5)
+      void getAppointments(page.id).then((items) =>
+        setAppointments(items.filter((a) => a.date >= today && a.status !== "cancelled").slice(0, 5))
       );
-      setInvoices(getInvoices(page.id).slice(0, 5));
+      void getInvoices(page.id).then((items) => setInvoices(items.slice(0, 5)));
     }
   }, [page]);
 

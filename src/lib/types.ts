@@ -1,13 +1,11 @@
-// Types mirroring the future Supabase schema.
-// When migrating, each interface maps to a table and the store functions
-// in src/lib/store.ts get reimplemented with supabase-js calls.
+// Types used by the Supabase-backed data layer.
 
 export type Role = "user" | "admin";
 
 export interface Profile {
   id: string;
   email: string;
-  password: string; // mock only — real auth moves to Supabase Auth
+  password: string; // kept for legacy UI shape; passwords live in Supabase Auth
   name: string;
   role: Role;
   createdAt: string;

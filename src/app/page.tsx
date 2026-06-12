@@ -5,13 +5,10 @@ import {
   Check,
   Hammer,
   KeyRound,
-  MapPin,
-  Paintbrush,
   QrCode,
   ReceiptText,
   Sparkles,
   UserPlus,
-  CakeSlice,
 } from "lucide-react";
 
 import { BRAND, PRICE_DZD, SITE_URL, SUPPORT_EMAIL } from "@/lib/config";
@@ -83,12 +80,6 @@ const steps = [
     title: "انشر واستقبل الزبائن",
     description: "شارك رابط صفحتك أو رمز QR واستقبل الحجوزات مباشرة على واتساب.",
   },
-];
-
-const demoPages = [
-  { slug: "najjar-mohamed", name: "ورشة النجار محمد", craft: "نجّار", city: "الجزائر", icon: Hammer },
-  { slug: "dahane-karim", name: "دهان وديكور كريم", craft: "دهّان", city: "وهران", icon: Paintbrush },
-  { slug: "halawiyat-sara", name: "حلويات سارة", craft: "صانعة حلويات", city: "قسنطينة", icon: CakeSlice },
 ];
 
 const faqs = [
@@ -196,7 +187,7 @@ export default function LandingPage() {
                 <Link href="/signup">أنشئ صفحتك مجاناً</Link>
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
-                <Link href="/najjar-mohamed">شاهد صفحة تجريبية</Link>
+                <Link href="/login">تسجيل الدخول</Link>
               </Button>
             </div>
             <p
@@ -281,35 +272,6 @@ export default function LandingPage() {
               </Button>
             </CardContent>
           </Card>
-        </section>
-
-        {/* Demo pages */}
-        <section className="border-y bg-card">
-          <div className="mx-auto max-w-6xl px-4 py-16">
-            <h2 className="text-center text-3xl font-extrabold">صفحات تجريبية</h2>
-            <p className="mt-3 text-center text-muted-foreground">
-              شاهد كيف تظهر صفحتك لزبائنك
-            </p>
-            <div className="mt-10 grid gap-5 sm:grid-cols-3">
-              {demoPages.map((demo) => (
-                <Link key={demo.slug} href={`/${demo.slug}`}>
-                  <Card className="h-full transition-shadow hover:shadow-lifted">
-                    <CardContent className="flex flex-col items-center p-6 text-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-primary">
-                        <demo.icon className="h-7 w-7" />
-                      </div>
-                      <h3 className="font-bold">{demo.name}</h3>
-                      <p className="text-sm text-muted-foreground">{demo.craft}</p>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3" />
-                        {demo.city}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
         </section>
 
         {/* FAQ */}

@@ -1,6 +1,5 @@
-// Client-side image downscaling so uploaded photos fit comfortably in
-// the demo's localStorage. With Supabase Storage this becomes a plain
-// file upload and this helper can be dropped or kept as a pre-upload step.
+// Client-side image downscaling before storing image payloads in Supabase.
+// This can later move to Supabase Storage for file-based uploads.
 
 export function compressImage(file: File, maxSize = 1280, quality = 0.82): Promise<string> {
   return new Promise((resolve, reject) => {

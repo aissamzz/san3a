@@ -18,13 +18,13 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
       toast.error("كلمة السر يجب أن تكون 6 أحرف على الأقل");
       return;
     }
-    const result = signup(name, email, password);
+    const result = await signup(name, email, password);
     if (!result.ok) {
       toast.error(result.message);
       return;

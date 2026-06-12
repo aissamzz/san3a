@@ -11,10 +11,10 @@ export function useMyPage() {
   const [page, setPage] = useState<Page | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  const refresh = useCallback(() => {
-    const session = getSession();
+  const refresh = useCallback(async () => {
+    const session = await getSession();
     setProfile(session);
-    setPage(session ? getPageByUserId(session.id) : null);
+    setPage(session ? await getPageByUserId(session.id) : null);
     setLoaded(true);
   }, []);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock, Phone } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,8 +49,7 @@ export function BookingWidget({ page }: { page: Page }) {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [serviceName, setServiceName] = useState(page.services[0]?.name ?? "");
   const [clientName, setClientName] = useState("");
-  // bump to re-read available slots after a booking is recorded
-  const [version, setVersion] = useState(0);
+  const [slots, setSlots] = useState<string[]>([]);
 
   const days: DayOption[] = useMemo(() => {
     const result: DayOption[] = [];
@@ -69,13 +68,15 @@ export function BookingWidget({ page }: { page: Page }) {
     return result;
   }, [page.hours]);
 
-  const slots = useMemo(
-    () => (selectedDate ? getAvailableSlots(page, selectedDate) : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [page, selectedDate, version]
-  );
+  useEffect(() => {
+    if (!selectedDate) {
+      setSlots([]);
+      return;
+    }
+    void getAvailableSlots(page, selectedDate).then(setSlots);
+  }, [page, selectedDate]);
 
-  const book = () => {
+  const book = async () => {
     if (!selectedDate || !selectedTime) {
       toast.error("اختر التاريخ والساعة أولاً");
       return;
@@ -85,7 +86,7 @@ export function BookingWidget({ page }: { page: Page }) {
       return;
     }
 
-    addAppointment({
+    await addAppointment({
       pageId: page.id,
       clientName: clientName.trim(),
       clientPhone: "",
@@ -113,7 +114,7 @@ export function BookingWidget({ page }: { page: Page }) {
 
     toast.success("تم إرسال طلب الحجز عبر واتساب وتسجيله عند الحرفي");
     setSelectedTime(null);
-    setVersion((value) => value + 1);
+    setSlots(await getAvailableSlots(page, selectedDate));
   };
 
   return (
