@@ -8,7 +8,6 @@ import { formatDZD, getInvoice, invoiceTotal } from "@/lib/store";
 import { useMyPage } from "@/lib/use-my-page";
 import type { Invoice } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export default function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -33,9 +32,10 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const total = invoiceTotal(invoice.items);
+  const paid = invoice.status === "paid";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <Button variant="ghost" asChild>
           <Link href="/dashboard/invoices">
@@ -57,81 +57,147 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
 
-      <Card className="print-area">
-        <CardContent className="p-8">
-          {/* Invoice header */}
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b pb-6">
-            <div>
-              <h1 className="text-2xl font-extrabold">{page.businessName}</h1>
-              {page.craft && <p className="text-muted-foreground">{page.craft}</p>}
-              <p className="text-sm text-muted-foreground">{page.city}</p>
-              {page.phone && (
-                <p className="text-sm text-muted-foreground" dir="ltr">
-                  {page.phone}
+      {/* Printable invoice document */}
+      <div className="print-area overflow-hidden rounded-2xl border bg-white shadow-soft">
+        {/* Brand band */}
+        <div className="h-2 w-full bg-primary" />
+
+        <div className="p-6 sm:p-10">
+          {/* Header: business + invoice meta */}
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold leading-tight">{page.businessName}</h1>
+              {page.craft && <p className="mt-0.5 font-semibold text-primary">{page.craft}</p>}
+              <div className="mt-3 space-y-0.5 text-sm text-muted-foreground">
+                {page.city && <p>{page.city}</p>}
+                {page.phone && <p dir="ltr" className="text-start">{page.phone}</p>}
+                <p dir="ltr" className="text-start">
+                  san3apages.com/{page.slug}
                 </p>
-              )}
+              </div>
             </div>
-            <div className="text-end">
-              <div className="text-xl font-extrabold text-primary">فاتورة</div>
-              <div className="mt-1 font-mono text-sm" dir="ltr">
-                {invoice.number}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                التاريخ: {invoice.date.slice(0, 10)}
-              </div>
+            <div className="shrink-0 text-end">
+              <div className="text-3xl font-extrabold tracking-tight text-primary">فاتورة</div>
+              <table className="mt-3 ms-auto text-sm">
+                <tbody>
+                  <tr>
+                    <td className="pe-4 py-0.5 text-muted-foreground">رقم الفاتورة</td>
+                    <td className="py-0.5 font-bold tabular-nums" dir="ltr">
+                      {invoice.number}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="pe-4 py-0.5 text-muted-foreground">التاريخ</td>
+                    <td className="py-0.5 font-bold tabular-nums" dir="ltr">
+                      {invoice.date.slice(0, 10)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <span
+                className={
+                  "mt-3 inline-block rounded-lg border-2 px-3 py-1 text-sm font-extrabold " +
+                  (paid
+                    ? "border-green-600 text-green-700"
+                    : "border-amber-500 text-amber-700")
+                }
+              >
+                {paid ? "مدفوعة" : "غير مدفوعة"}
+              </span>
             </div>
           </div>
 
           {/* Client */}
-          <div className="border-b py-5">
-            <div className="text-xs font-bold uppercase text-muted-foreground">فاتورة إلى</div>
-            <div className="mt-1 font-bold">{invoice.clientName}</div>
-            {invoice.clientPhone && (
-              <div className="text-sm text-muted-foreground" dir="ltr">
-                {invoice.clientPhone}
-              </div>
-            )}
-          </div>
-
-          {/* Items */}
-          <table className="mt-5 w-full text-sm">
-            <thead>
-              <tr className="border-b text-start text-muted-foreground">
-                <th className="pb-2 text-start font-semibold">الوصف</th>
-                <th className="pb-2 text-center font-semibold">الكمية</th>
-                <th className="pb-2 text-center font-semibold">السعر</th>
-                <th className="pb-2 text-end font-semibold">المجموع</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.items.map((item) => (
-                <tr key={item.id} className="border-b last:border-0">
-                  <td className="py-3 font-semibold">{item.description}</td>
-                  <td className="py-3 text-center tabular-nums">{item.qty}</td>
-                  <td className="py-3 text-center tabular-nums">{formatDZD(item.price)}</td>
-                  <td className="py-3 text-end font-bold tabular-nums">
-                    {formatDZD(item.qty * item.price)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Total */}
-          <div className="mt-6 flex justify-end">
-            <div className="w-56 rounded-xl bg-accent px-5 py-4">
-              <div className="flex items-center justify-between">
-                <span className="font-bold">المجموع الكلي</span>
-                <span className="text-lg font-extrabold text-primary">{formatDZD(total)}</span>
-              </div>
+          <div className="mt-8 rounded-xl bg-muted/60 p-4 sm:p-5">
+            <div className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+              فاتورة إلى
+            </div>
+            <div className="mt-1.5 text-lg font-bold">{invoice.clientName}</div>
+            <div className="mt-0.5 space-y-0.5 text-sm text-muted-foreground">
+              {invoice.clientPhone && (
+                <p dir="ltr" className="text-start">
+                  {invoice.clientPhone}
+                </p>
+              )}
+              {invoice.clientAddress && <p>{invoice.clientAddress}</p>}
             </div>
           </div>
 
-          <p className="mt-10 text-center text-xs text-muted-foreground">
-            شكراً لثقتكم — {page.businessName} • san3apages.com/{page.slug}
+          {/* Items table */}
+          <div className="mt-8 overflow-x-auto">
+            <table className="w-full min-w-[480px] text-sm">
+              <thead>
+                <tr className="border-b-2 border-foreground/80 text-muted-foreground">
+                  <th className="w-8 pb-2.5 text-start font-bold">#</th>
+                  <th className="pb-2.5 text-start font-bold">الوصف</th>
+                  <th className="w-16 pb-2.5 text-center font-bold">الكمية</th>
+                  <th className="w-32 pb-2.5 text-center font-bold">سعر الوحدة</th>
+                  <th className="w-32 pb-2.5 text-end font-bold">المجموع</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.items.map((item, i) => (
+                  <tr key={item.id} className="border-b">
+                    <td className="py-3 text-muted-foreground tabular-nums">{i + 1}</td>
+                    <td className="py-3 font-semibold">{item.description}</td>
+                    <td className="py-3 text-center tabular-nums">{item.qty}</td>
+                    <td className="py-3 text-center tabular-nums">{formatDZD(item.price)}</td>
+                    <td className="py-3 text-end font-bold tabular-nums">
+                      {formatDZD(item.qty * item.price)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals */}
+          <div className="mt-6 flex justify-end">
+            <div className="w-full max-w-xs space-y-2">
+              <div className="flex items-center justify-between rounded-xl bg-primary px-5 py-3.5 text-primary-foreground">
+                <span className="font-extrabold">المجموع الكلي</span>
+                <span className="text-lg font-extrabold tabular-nums">{formatDZD(total)}</span>
+              </div>
+              {paid && (
+                <p className="text-end text-xs text-green-700">تم استلام المبلغ كاملاً ✓</p>
+              )}
+            </div>
+          </div>
+
+          {/* Notes */}
+          {invoice.notes && (
+            <div className="mt-8 rounded-xl border border-dashed p-4">
+              <div className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
+                ملاحظات
+              </div>
+              <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed">{invoice.notes}</p>
+            </div>
+          )}
+
+          {/* Signatures */}
+          <div className="mt-12 grid grid-cols-2 gap-8 text-center text-sm text-muted-foreground">
+            <div>
+              <div className="mx-auto h-16 max-w-[180px] border-b" />
+              <p className="mt-2 font-semibold">توقيع البائع</p>
+            </div>
+            <div>
+              <div className="mx-auto h-16 max-w-[180px] border-b" />
+              <p className="mt-2 font-semibold">توقيع الزبون</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="mt-10 border-t pt-5 text-center text-xs text-muted-foreground">
+            شكراً لثقتكم — {page.businessName}
+            {page.phone && (
+              <>
+                {" • "}
+                <span dir="ltr">{page.phone}</span>
+              </>
+            )}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, Hammer, MapPin, Phone } from "lucide-react";
+import { CalendarDays, Eye, Hammer, MapPin, Phone } from "lucide-react";
 
 import { formatDZD, getPageBySlug, isPageLive } from "@/lib/store";
 import type { Page } from "@/lib/types";
@@ -90,7 +90,13 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
           {page.description && (
             <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">{page.description}</p>
           )}
-          <div className="mt-5 flex gap-2">
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <a href="#booking">
+                <CalendarDays className="h-4 w-4" />
+                احجز موعد
+              </a>
+            </Button>
             <Button variant="whatsapp" asChild>
               <a href={`https://wa.me/${page.whatsapp}`} target="_blank" rel="noopener noreferrer">
                 <WhatsAppIcon className="h-4 w-4" />
@@ -147,11 +153,29 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-5 text-center text-sm text-muted-foreground">
+      <footer className="border-t bg-card py-5 pb-24 text-center text-sm text-muted-foreground sm:pb-5">
         <Link href="/" className="transition-colors hover:text-primary">
           صُنع بواسطة <span className="font-bold">san3apages</span> 🛠️
         </Link>
       </footer>
+
+      {/* Sticky mobile action bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 p-3 pb-safe backdrop-blur sm:hidden">
+        <div className="flex gap-2">
+          <Button variant="whatsapp" className="flex-1" asChild>
+            <a href="#booking">
+              <WhatsAppIcon className="h-4 w-4" />
+              احجز عبر واتساب
+            </a>
+          </Button>
+          <Button variant="outline" className="flex-1" asChild>
+            <a href={`tel:${page.phone}`}>
+              <Phone className="h-4 w-4" />
+              اتصل الآن
+            </a>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

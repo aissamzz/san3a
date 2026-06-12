@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Check, Globe, Pencil, Plus, Trash2, X } from "lucide-react";
+import { CalendarDays, Check, Clock, Globe, Pencil, Phone, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -122,11 +122,11 @@ export default function AppointmentsPage() {
   const dates = Object.keys(grouped).sort();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl space-y-5 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold">المواعيد</h1>
-          <p className="text-muted-foreground">
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold sm:text-2xl">المواعيد</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
             حجوزات الصفحة تظهر هنا تلقائياً، وتقدر تضيف مواعيدك يدوياً
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function AppointmentsPage() {
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <CalendarDays className="h-10 w-10 text-muted-foreground" />
-            <p className="font-semibold">لا توجد مواعيد بعد</p>
+            <p className="font-bold">لا توجد مواعيد بعد</p>
             <p className="text-sm text-muted-foreground">
               عندما يحجز زبون من صفحتك، سيظهر الموعد هنا مباشرة
             </p>
@@ -219,52 +219,55 @@ export default function AppointmentsPage() {
         </Card>
       ) : (
         dates.map((d) => (
-          <div key={d} className="space-y-2">
-            <h2 className="font-bold text-muted-foreground">{dayLabel(d)}</h2>
-            <Card>
-              <CardContent className="divide-y p-0">
-                {grouped[d].map((a) => (
-                  <div key={a.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-                    <div className="w-14 shrink-0 text-center">
-                      <div className="text-lg font-extrabold tabular-nums" dir="ltr">
-                        {a.time}
+          <div key={d} className="space-y-2.5">
+            <h2 className="px-1 text-sm font-extrabold text-muted-foreground">{dayLabel(d)}</h2>
+            <div className="space-y-3">
+              {grouped[d].map((a) => (
+                <Card key={a.id} className={a.status === "cancelled" ? "opacity-60" : undefined}>
+                  <CardContent className="p-4 sm:p-5">
+                    {/* Top: time + client + status */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1.5 text-sm font-extrabold tabular-nums text-accent-foreground">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span dir="ltr">{a.time}</span>
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <span className="truncate font-bold">{a.clientName}</span>
+                            {a.source === "web" && (
+                              <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                                <Globe className="h-3 w-3" />
+                                عبر الصفحة
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-0.5 truncate text-sm text-muted-foreground">
+                            {a.serviceName || "بدون خدمة محددة"}
+                          </div>
+                          {a.clientPhone && (
+                            <a
+                              href={`tel:${a.clientPhone}`}
+                              className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"
+                            >
+                              <Phone className="h-3 w-3" />
+                              <span dir="ltr">{a.clientPhone}</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
+                      <Badge variant={statusConfig[a.status].variant} className="shrink-0">
+                        {statusConfig[a.status].label}
+                      </Badge>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-semibold">{a.clientName}</span>
-                        {a.source === "web" && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Globe className="h-3 w-3" />
-                            عبر الصفحة
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {a.serviceName || "بدون خدمة محددة"}
-                        {a.clientPhone && (
-                          <span dir="ltr"> • {a.clientPhone}</span>
-                        )}
-                      </div>
-                    </div>
-                    <Badge variant={statusConfig[a.status].variant}>
-                      {statusConfig[a.status].label}
-                    </Badge>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="تعديل"
-                        onClick={() => openEdit(a)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+
+                    {/* Bottom: actions */}
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t pt-3">
                       {a.status === "pending" && (
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="text-green-600"
-                          aria-label="تأكيد"
+                          size="sm"
+                          className="text-green-700"
                           onClick={() => {
                             updateAppointmentStatus(a.id, "confirmed");
                             refresh();
@@ -272,14 +275,18 @@ export default function AppointmentsPage() {
                           }}
                         >
                           <Check className="h-4 w-4" />
+                          تأكيد
                         </Button>
                       )}
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(a)}>
+                        <Pencil className="h-4 w-4" />
+                        تعديل
+                      </Button>
                       {a.status !== "cancelled" && (
                         <Button
                           variant="ghost"
-                          size="icon"
+                          size="sm"
                           className="text-muted-foreground"
-                          aria-label="إلغاء"
                           onClick={() => {
                             updateAppointmentStatus(a.id, "cancelled");
                             refresh();
@@ -287,13 +294,13 @@ export default function AppointmentsPage() {
                           }}
                         >
                           <X className="h-4 w-4" />
+                          إلغاء
                         </Button>
                       )}
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        aria-label="حذف"
+                        size="sm"
+                        className="ms-auto text-destructive"
                         onClick={() => {
                           deleteAppointment(a.id);
                           refresh();
@@ -301,12 +308,13 @@ export default function AppointmentsPage() {
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
+                        حذف
                       </Button>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         ))
       )}

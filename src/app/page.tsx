@@ -106,11 +106,11 @@ export default function LandingPage() {
               صنعة<span className="text-primary">بيدجز</span>
             </span>
           </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">تسجيل الدخول</Link>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <Button variant="ghost" size="sm" className="sm:h-11 sm:px-5" asChild>
+              <Link href="/login">دخول</Link>
             </Button>
-            <Button asChild>
+            <Button size="sm" className="sm:h-11 sm:px-5" asChild>
               <Link href="/signup">أنشئ صفحتك</Link>
             </Button>
           </div>
@@ -120,29 +120,31 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-accent/60 to-background" />
-          <div className="mx-auto max-w-6xl px-4 py-20 text-center md:py-28">
-            <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-semibold text-muted-foreground">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-accent/70 via-background to-background" />
+          <div className="pointer-events-none absolute -start-24 top-16 -z-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -end-24 top-40 -z-10 h-72 w-72 rounded-full bg-secondary blur-3xl" />
+          <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:py-20 md:py-28">
+            <div className="animate-rise-in mx-auto mb-5 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-bold text-muted-foreground shadow-soft">
               <Sparkles className="h-4 w-4 text-primary" />
               منصة الحرفيين في الجزائر
             </div>
-            <h1 className="mx-auto max-w-3xl text-4xl font-extrabold leading-tight md:text-5xl">
+            <h1 className="animate-rise-in mx-auto max-w-3xl text-balance text-3xl font-extrabold leading-[1.25] sm:text-4xl md:text-5xl md:leading-[1.2]" style={{ animationDelay: "80ms" }}>
               صنعتك تستاهل صفحة <span className="text-primary">باسمك</span> على الإنترنت
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
+            <p className="animate-rise-in mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg" style={{ animationDelay: "160ms" }}>
               نجّار، دهّان، حلواني، مصوّر... أيّاً كانت صنعتك، أنشئ صفحة احترافية تعرض فيها أعمالك
               وخدماتك، واستقبل حجوزات زبائنك مباشرة عبر واتساب.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" asChild>
+            <div className="animate-rise-in mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row" style={{ animationDelay: "240ms" }}>
+              <Button size="lg" className="w-full sm:w-auto" asChild>
                 <Link href="/signup">أنشئ صفحتك مجاناً</Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
                 <Link href="/najjar-mohamed">شاهد صفحة تجريبية</Link>
               </Button>
             </div>
-            <p className="mt-6 text-sm text-muted-foreground" dir="ltr">
-              san3apages.com/<span className="font-bold text-primary">إسم-صنعتك</span>
+            <p className="animate-rise-in mt-6 inline-block rounded-full bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-soft" dir="ltr" style={{ animationDelay: "320ms" }}>
+              san3apages.com/<span className="font-extrabold text-primary">إسم-صنعتك</span>
             </p>
           </div>
         </section>

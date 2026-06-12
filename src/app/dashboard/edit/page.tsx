@@ -64,9 +64,9 @@ export default function EditPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-extrabold">تعديل الصفحة</h1>
-          <p className="text-muted-foreground">هكذا يراك زبائنك — اجعلها مميزة</p>
+        <div className="min-w-0">
+          <h1 className="text-xl font-extrabold sm:text-2xl">تعديل الصفحة</h1>
+          <p className="text-sm text-muted-foreground sm:text-base">هكذا يراك زبائنك — اجعلها مميزة</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
@@ -206,9 +206,9 @@ export default function EditPage() {
             </p>
           )}
           {draft.services.map((service, i) => (
-            <div key={service.id} className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
-                {i === 0 && <Label>اسم الخدمة</Label>}
+            <div key={service.id} className="flex flex-wrap items-end gap-2">
+              <div className="w-full min-w-0 space-y-1 sm:w-auto sm:flex-1">
+                <Label className="text-xs text-muted-foreground">اسم الخدمة {i + 1}</Label>
                 <Input
                   placeholder="مثال: مطبخ على المقاس"
                   value={service.name}
@@ -222,8 +222,8 @@ export default function EditPage() {
                   }
                 />
               </div>
-              <div className="w-36 space-y-1">
-                {i === 0 && <Label>السعر (دج)</Label>}
+              <div className="min-w-0 flex-1 space-y-1 sm:flex-none sm:basis-36">
+                <Label className="text-xs text-muted-foreground">السعر يبدأ من (دج)</Label>
                 <Input
                   type="number"
                   dir="ltr"
@@ -244,7 +244,7 @@ export default function EditPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive"
+                className="shrink-0 text-destructive"
                 aria-label="حذف الخدمة"
                 onClick={() =>
                   set("services", draft.services.filter((s) => s.id !== service.id))

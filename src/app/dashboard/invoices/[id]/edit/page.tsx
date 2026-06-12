@@ -27,6 +27,10 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
     setForm({
       clientName: invoice.clientName,
       clientPhone: invoice.clientPhone,
+      clientAddress: invoice.clientAddress ?? "",
+      date: invoice.date.slice(0, 10),
+      status: invoice.status ?? "unpaid",
+      notes: invoice.notes ?? "",
       items: invoice.items,
     });
   }, [id]);
@@ -59,6 +63,10 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
     updateInvoice(id, {
       clientName: form.clientName.trim(),
       clientPhone: form.clientPhone.trim(),
+      clientAddress: form.clientAddress.trim(),
+      date: form.date,
+      status: form.status,
+      notes: form.notes.trim(),
       items: validItems,
     });
     toast.success("تم حفظ التعديلات");
@@ -66,9 +74,9 @@ export default function EditInvoicePage({ params }: { params: Promise<{ id: stri
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-extrabold">
+        <h1 className="flex items-center gap-2 text-xl font-extrabold sm:text-2xl">
           <ReceiptText className="h-6 w-6 text-primary" />
           تعديل الفاتورة
         </h1>
