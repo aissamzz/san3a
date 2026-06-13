@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
-  Hammer,
   KeyRound,
   LayoutDashboard,
   LogOut,
@@ -18,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getSession, logout } from "@/lib/store";
 import type { Profile, Role } from "@/lib/types";
+import { BrandMark } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -91,9 +91,7 @@ export function DashboardShell({
       {/* Sidebar (desktop) */}
       <aside className="no-print hidden w-64 shrink-0 flex-col border-e bg-card md:flex">
         <Link href="/" className="flex items-center gap-2.5 border-b px-6 py-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Hammer className="h-5 w-5" />
-          </span>
+          <BrandMark className="h-9 w-9" />
           <span className="text-lg font-extrabold">صنعة</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-1 p-3">
@@ -136,9 +134,7 @@ export function DashboardShell({
         <header className="no-print sticky top-0 z-40 border-b bg-card/95 backdrop-blur md:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Hammer className="h-4 w-4" />
-              </span>
+              <BrandMark className="h-8 w-8" />
               <span className="font-extrabold">صنعة</span>
             </Link>
             <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="تسجيل الخروج">

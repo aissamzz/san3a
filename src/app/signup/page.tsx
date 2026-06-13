@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Hammer } from "lucide-react";
 import { toast } from "sonner";
 
 import { signup } from "@/lib/store";
+import { BrandMark } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ export default function SignupPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-accent/50 to-background px-4 py-10">
       <Link href="/" className="mb-6 flex items-center gap-2">
-        <Hammer className="h-7 w-7 text-primary" />
+        <BrandMark className="h-9 w-9" />
         <span className="text-2xl font-extrabold">
           صنعة
         </span>
