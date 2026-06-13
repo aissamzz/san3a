@@ -3,9 +3,9 @@
 // (see getPageBySlug) so the demos work on a fresh install with an empty
 // database. Phone / WhatsApp all point at the platform support number.
 //
-// Images use picsum.photos (free, stable, no-auth placeholders) so the demos
-// always render. To use real craft photos, replace the URLs below — each is a
-// single constant per image.
+// Images are free/openly-licensed photos from Wikimedia Commons and Flickr.
+// Each image is a single direct URL (avatarUrl / coverUrl / gallery[].url) and
+// can be swapped independently.
 
 import type { Page } from "./types";
 import { SUPPORT_WHATSAPP } from "./config";
@@ -40,8 +40,10 @@ export const DEMO_PAGES: Page[] = [
       "نجارة عصرية وكلاسيكية على المقاس: مطابخ، خزائن، أبواب وديكورات خشبية. خبرة تتجاوز خمسة عشر عاماً في خدمة عائلات العاصمة، مع التزام بالمواعيد وجودة التشطيب.",
     phone: PHONE,
     whatsapp: WHATSAPP,
-    avatarUrl: "https://picsum.photos/seed/sanaa-najjar-avatar/400/400",
-    coverUrl: "https://picsum.photos/seed/sanaa-najjar-cover/1200/400",
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/6/62/Carpenter_%2810424%29_-_The_Noun_Project.svg",
+    coverUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/8/8c/Paris_-_Carpenter_workshop_-_4944.jpg",
     services: [
       { id: "s1", name: "مطبخ خشب على المقاس", startingPrice: 120000 },
       { id: "s2", name: "خزانة ملابس مدمجة", startingPrice: 65000 },
@@ -49,12 +51,10 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "مكتبة أو رفوف حائط", startingPrice: 18000 },
     ],
     gallery: [
-      { id: "g1", url: "https://picsum.photos/seed/sanaa-najjar-1/800/800" },
-      { id: "g2", url: "https://picsum.photos/seed/sanaa-najjar-2/800/800" },
-      { id: "g3", url: "https://picsum.photos/seed/sanaa-najjar-3/800/800" },
-      { id: "g4", url: "https://picsum.photos/seed/sanaa-najjar-4/800/800" },
-      { id: "g5", url: "https://picsum.photos/seed/sanaa-najjar-5/800/800" },
-      { id: "g6", url: "https://picsum.photos/seed/sanaa-najjar-6/800/800" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/7/73/Paris_-_Carpenter_workshop_-_4951.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/9/9b/Paris_-_Carpenter_workshop_-_4965.jpg" },
+      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/0/03/Paris_-_Carpenter_workshop_-_4980.jpg" },
+      { id: "g4", url: "https://live.staticflickr.com/2511/4112389321_fd8dfffd47_b.jpg" },
     ],
     hours: week("08:30", "17:30"),
     activated: true,
@@ -73,8 +73,10 @@ export const DEMO_PAGES: Page[] = [
       "خدمات دهن وتشطيب احترافية للمنازل والمحلات: دهن جدران، جبس بلاكو، ديكورات وأصباغ حديثة. عمل نظيف، أسعار واضحة، ونتيجة تليق بمنزلك.",
     phone: PHONE,
     whatsapp: WHATSAPP,
-    avatarUrl: "https://picsum.photos/seed/sanaa-dahane-avatar/400/400",
-    coverUrl: "https://picsum.photos/seed/sanaa-dahane-cover/1200/400",
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/5/5e/Font_Awesome_5_solid_paint-roller.svg",
+    coverUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/e/e0/A_home_painter_at_work.jpg",
     services: [
       { id: "s1", name: "دهن شقة كاملة", startingPrice: 45000 },
       { id: "s2", name: "دهن الغرفة الواحدة", startingPrice: 9000 },
@@ -82,12 +84,10 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "دهن واجهة محل", startingPrice: 30000 },
     ],
     gallery: [
-      { id: "g1", url: "https://picsum.photos/seed/sanaa-dahane-1/800/800" },
-      { id: "g2", url: "https://picsum.photos/seed/sanaa-dahane-2/800/800" },
-      { id: "g3", url: "https://picsum.photos/seed/sanaa-dahane-3/800/800" },
-      { id: "g4", url: "https://picsum.photos/seed/sanaa-dahane-4/800/800" },
-      { id: "g5", url: "https://picsum.photos/seed/sanaa-dahane-5/800/800" },
-      { id: "g6", url: "https://picsum.photos/seed/sanaa-dahane-6/800/800" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/d/d5/0086_wall_painting.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/6/63/Fort_Kochi_-_Wall_Painters_on_ropes.jpg" },
+      { id: "g3", url: "https://live.staticflickr.com/1233/3267421536_3050c57cc3_b.jpg" },
+      { id: "g4", url: "https://live.staticflickr.com/2111/1813415211_59a7ced74a.jpg" },
     ],
     hours: week("08:00", "18:00"),
     activated: true,
@@ -106,8 +106,10 @@ export const DEMO_PAGES: Page[] = [
       "حلويات تقليدية وعصرية محضّرة بمكوّنات طازجة: حلويات الأعراس، تورتات أعياد الميلاد، وطلبات المناسبات. نكهة قسنطينة الأصيلة بلمسة راقية.",
     phone: PHONE,
     whatsapp: WHATSAPP,
-    avatarUrl: "https://picsum.photos/seed/sanaa-halawiyat-avatar/400/400",
-    coverUrl: "https://picsum.photos/seed/sanaa-halawiyat-cover/1200/400",
+    avatarUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/2/2f/Confectioner%2C_pastry-cook.svg",
+    coverUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/1/1b/Algerian_pastries.jpg",
     services: [
       { id: "s1", name: "صينية حلويات الأعراس (الكيلو)", startingPrice: 2800 },
       { id: "s2", name: "تورتة عيد ميلاد", startingPrice: 4500 },
@@ -115,12 +117,11 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "طلبات خاصة حسب الطلب", startingPrice: 3000 },
     ],
     gallery: [
-      { id: "g1", url: "https://picsum.photos/seed/sanaa-halawiyat-1/800/800" },
-      { id: "g2", url: "https://picsum.photos/seed/sanaa-halawiyat-2/800/800" },
-      { id: "g3", url: "https://picsum.photos/seed/sanaa-halawiyat-3/800/800" },
-      { id: "g4", url: "https://picsum.photos/seed/sanaa-halawiyat-4/800/800" },
-      { id: "g5", url: "https://picsum.photos/seed/sanaa-halawiyat-5/800/800" },
-      { id: "g6", url: "https://picsum.photos/seed/sanaa-halawiyat-6/800/800" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/f/f8/Tcharek_el_ariane_%28algerian_pastry%29.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/7/7d/Algerian_Pastry.JPG" },
+      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/4/40/Makrout_ellouz.jpg" },
+      { id: "g4", url: "https://live.staticflickr.com/7035/6429963321_293fd4a55f.jpg" },
+      { id: "g5", url: "https://live.staticflickr.com/3158/5738006754_9f71cc072c.jpg" },
     ],
     hours: week("09:00", "19:00"),
     activated: true,

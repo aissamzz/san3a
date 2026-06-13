@@ -202,10 +202,11 @@ balanced, lots of whitespace, crisp vector look.
 
 ## 5. ملاحظة حول صور الديمو
 
-الصور الحالية في الصفحات التجريبية مأخوذة من `picsum.photos` (صور مجانية ثابتة تُحمَّل دائماً، لكنها غير مرتبطة بالحرفة). لاستبدالها بصور حقيقية مناسبة:
+صور الصفحات التجريبية الآن صور حقيقية مفتوحة الترخيص من **Wikimedia Commons** و **Flickr** (ورشة نجارة، أعمال دهن، حلويات جزائرية)، مُضمَّنة كروابط مباشرة في `src/lib/demo-pages.ts`.
 
-1. اختر صوراً مجانية من Unsplash أو Pexels (بحث: `carpenter workshop`, `house painting interior`, `algerian pastries`).
-2. انسخ رابط الصورة المباشر، أو حمّلها وارفعها في مجلد `public/demos/`.
-3. استبدل الروابط في `src/lib/demo-pages.ts` (كل صورة = رابط واحد، avatarUrl / coverUrl / gallery).
+لتغييرها لاحقاً:
+
+1. اختر صورة مفتوحة الترخيص (Wikimedia Commons / Unsplash / Pexels)، أو حمّلها وارفعها في `public/demos/`.
+2. استبدل الرابط المعني في `src/lib/demo-pages.ts` (كل صورة = رابط واحد: avatarUrl / coverUrl / gallery).
 
 > يمكنك إرسال الروابط إلى Claude Code لاستبدالها دفعة واحدة.
