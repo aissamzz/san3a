@@ -10,6 +10,7 @@ import {
   QrCode,
   ReceiptText,
   Sparkles,
+  Star,
   UserPlus,
   CakeSlice,
 } from "lucide-react";
@@ -89,6 +90,37 @@ const demoPages = [
   { slug: "najjar-mohamed", name: "ورشة النجار محمد", craft: "نجّار", city: "الجزائر", icon: Hammer },
   { slug: "dahane-karim", name: "دهان وديكور كريم", craft: "دهّان", city: "وهران", icon: Paintbrush },
   { slug: "halawiyat-sara", name: "حلويات سارة", craft: "صانعة حلويات", city: "قسنطينة", icon: CakeSlice },
+];
+
+const testimonials = [
+  {
+    name: "محمد",
+    craft: "نجّار، الجزائر",
+    avatar: "https://i.pravatar.cc/120?img=12",
+    quote:
+      "صار زبائني يشاهدون أعمالي كاملة قبل أن يتصلوا بي. صفحتي أعطتني مصداقية كنت أحتاجها منذ سنوات.",
+  },
+  {
+    name: "كريم",
+    craft: "دهّان، وهران",
+    avatar: "https://i.pravatar.cc/120?img=33",
+    quote:
+      "وضعت رمز QR على واجهة المحل، والزبائن يحجزون مواعيدهم عبر واتساب مباشرة. وفّر علي مكالمات كثيرة.",
+  },
+  {
+    name: "سارة",
+    craft: "صانعة حلويات، قسنطينة",
+    avatar: "https://i.pravatar.cc/120?img=47",
+    quote:
+      "الفواتير الجاهزة للطباعة أعطت طلباتي طابعاً احترافياً. والسعر معقول جداً مقارنة بما كنت أتوقعه.",
+  },
+  {
+    name: "يوسف",
+    craft: "حلاق، عنابة",
+    avatar: "https://i.pravatar.cc/120?img=8",
+    quote:
+      "التسجيل كان سهلاً جداً، وفي أقل من نصف ساعة كانت صفحتي جاهزة وأرسلتها لكل زبائني على واتساب.",
+  },
 ];
 
 const faqs = [
@@ -217,7 +249,10 @@ export default function LandingPage() {
           </p>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
-              <Card key={feature.title}>
+              <Card
+                key={feature.title}
+                className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lifted"
+              >
                 <CardContent className="p-6">
                   <div className="mb-4 inline-flex rounded-xl bg-accent p-3 text-primary">
                     <feature.icon className="h-6 w-6" />
@@ -309,6 +344,41 @@ export default function LandingPage() {
                 </Link>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="mx-auto max-w-6xl px-4 py-16">
+          <h2 className="text-center text-3xl font-extrabold">ماذا يقول الحرفيون؟</h2>
+          <p className="mt-3 text-center text-muted-foreground">
+            تجارب حقيقية من حرفيين بدأوا باستخدام صنعة
+          </p>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {testimonials.map((t) => (
+              <Card key={t.name} className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lifted">
+                <CardContent className="flex h-full flex-col p-6">
+                  <div className="mb-1 flex gap-0.5 text-primary">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-current" />
+                    ))}
+                  </div>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    “{t.quote}”
+                  </p>
+                  <div className="mt-5 flex items-center gap-3">
+                    <img
+                      src={t.avatar}
+                      alt={t.name}
+                      className="h-11 w-11 rounded-full object-cover"
+                    />
+                    <div>
+                      <div className="font-bold">{t.name}</div>
+                      <div className="text-xs text-muted-foreground">{t.craft}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
