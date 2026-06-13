@@ -7,9 +7,8 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      // The mock data layer lives in localStorage, which is only readable
-      // after mount — loading it in useEffect + setState is intentional.
-      // Goes away once the store is reimplemented on Supabase.
+      // Data loads from Supabase after mount, so loading it in
+      // useEffect + setState is intentional.
       "react-hooks/set-state-in-effect": "off",
     },
   },
