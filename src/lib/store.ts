@@ -4,6 +4,7 @@
 // defined in supabase/schema.sql.
 
 import { createClient } from "./supabase/client";
+import { getDemoPageBySlug, isDemoPageId } from "./demo-pages";
 import type {
   ActivationKey,
   Appointment,
@@ -169,6 +170,8 @@ export async function getSession(): Promise<Profile | null> {
 // ---------- Pages ----------
 
 export async function getPageBySlug(slug: string): Promise<Page | null> {
+  const demo = getDemoPageBySlug(slug);
+  if (demo) return demo;
   const { data, error } = await supabase.from("pages").select("*").eq("slug", slug).maybeSingle();
   if (error || !data) return null;
   return rowToPage(data);
@@ -205,6 +208,11 @@ export async function getAppointments(pageId: string): Promise<Appointment[]> {
 }
 
 export async function addAppointment(data: Omit<Appointment, "id" | "createdAt">): Promise<Appointment | null> {
+  // Demo pages have no DB row — return a synthetic appointment so the public
+  // booking flow (which opens WhatsApp) still works on the demos.
+  if (isDemoPageId(data.pageId)) {
+    return { ...data, id: uid(), createdAt: new Date().toISOString() };
+  }
   const { data: row, error } = await supabase
     .from("appointments")
     .insert({
@@ -248,6 +256,7 @@ export async function deleteAppointment(id: string) {
 
 /** Times already taken (pending or confirmed) for a page on a given day. */
 export async function getBookedTimes(pageId: string, date: string): Promise<string[]> {
+  if (isDemoPageId(pageId)) return [];
   const { data, error } = await supabase
     .from("appointments")
     .select("time")

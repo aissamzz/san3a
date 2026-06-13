@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Hammer } from "lucide-react";
 
 import { BRAND, SITE_DOMAIN, SUPPORT_EMAIL } from "@/lib/config";
+import { BrandMark } from "@/components/brand-logo";
 
 const footerLinks = [
   { href: "/privacy", label: "سياسة الخصوصية" },
@@ -15,9 +15,7 @@ export function SiteFooter() {
     <footer className="border-t bg-card">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-10 text-center text-sm text-muted-foreground">
         <Link href="/" className="flex items-center gap-2 font-extrabold text-foreground">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Hammer className="h-4 w-4" />
-          </span>
+          <BrandMark className="h-8 w-8" />
           {BRAND}
         </Link>
         <p>
