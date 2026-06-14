@@ -3,14 +3,15 @@ import Link from "next/link";
 import {
   CalendarDays,
   Check,
+  GraduationCap,
   Hammer,
+  HeartHandshake,
   KeyRound,
   MapPin,
   Paintbrush,
   QrCode,
   ReceiptText,
   Sparkles,
-  Star,
   UserPlus,
   CakeSlice,
 } from "lucide-react";
@@ -90,37 +91,6 @@ const demoPages = [
   { slug: "najjar-mohamed", name: "ورشة النجار محمد", craft: "نجّار", city: "الجزائر", icon: Hammer },
   { slug: "dahane-karim", name: "دهان وديكور كريم", craft: "دهّان", city: "وهران", icon: Paintbrush },
   { slug: "halawiyat-sara", name: "حلويات سارة", craft: "صانعة حلويات", city: "قسنطينة", icon: CakeSlice },
-];
-
-const testimonials = [
-  {
-    name: "محمد",
-    craft: "نجّار، الجزائر",
-    avatar: "https://i.pravatar.cc/120?img=12",
-    quote:
-      "صار زبائني يشاهدون أعمالي كاملة قبل أن يتصلوا بي. صفحتي أعطتني مصداقية كنت أحتاجها منذ سنوات.",
-  },
-  {
-    name: "كريم",
-    craft: "دهّان، وهران",
-    avatar: "https://i.pravatar.cc/120?img=33",
-    quote:
-      "وضعت رمز QR على واجهة المحل، والزبائن يحجزون مواعيدهم عبر واتساب مباشرة. وفّر علي مكالمات كثيرة.",
-  },
-  {
-    name: "سارة",
-    craft: "صانعة حلويات، قسنطينة",
-    avatar: "https://i.pravatar.cc/120?img=47",
-    quote:
-      "الفواتير الجاهزة للطباعة أعطت طلباتي طابعاً احترافياً. والسعر معقول جداً مقارنة بما كنت أتوقعه.",
-  },
-  {
-    name: "يوسف",
-    craft: "حلاق، عنابة",
-    avatar: "https://i.pravatar.cc/120?img=8",
-    quote:
-      "التسجيل كان سهلاً جداً، وفي أقل من نصف ساعة كانت صفحتي جاهزة وأرسلتها لكل زبائني على واتساب.",
-  },
 ];
 
 const faqs = [
@@ -347,38 +317,51 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* Social cause */}
         <section className="mx-auto max-w-6xl px-4 py-16">
-          <h2 className="text-center text-3xl font-extrabold">ماذا يقول الحرفيون؟</h2>
-          <p className="mt-3 text-center text-muted-foreground">
-            تجارب حقيقية من حرفيين بدأوا باستخدام صنعة
-          </p>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {testimonials.map((t) => (
-              <Card key={t.name} className="transition-all duration-200 hover:-translate-y-1 hover:shadow-lifted">
-                <CardContent className="flex h-full flex-col p-6">
-                  <div className="mb-1 flex gap-0.5 text-primary">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current" />
-                    ))}
+          <div className="overflow-hidden rounded-3xl border bg-gradient-to-b from-accent/70 to-card shadow-soft">
+            <div className="grid items-center gap-8 p-8 md:grid-cols-2 md:p-12">
+              <div>
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm font-bold text-primary shadow-soft">
+                  <HeartHandshake className="h-4 w-4" />
+                  قضيتنا الاجتماعية
+                </div>
+                <h2 className="text-3xl font-extrabold leading-snug">
+                  <span className="text-primary">10٪</span> من كل اشتراك سنوي
+                  <br />
+                  لتعليم الصنعة للجميع
+                </h2>
+                <p className="mt-4 leading-relaxed text-muted-foreground">
+                  نؤمن أن الصنعة ثروة تُورَّث. لذلك نخصّص عشرة بالمئة من قيمة كل
+                  اشتراك سنوي لتمويل ورشات تدريبية مجانية، يتعلّم فيها الشباب — ومن
+                  كل الأعمار، نساءً ورجالاً — حِرفاً جديدة على يد حرفيين مهرة.
+                </p>
+                <p className="mt-4 leading-relaxed text-muted-foreground">
+                  باشتراكك في صنعة، لا تبني حضورك الرقمي فحسب، بل تساهم في تكوين
+                  جيل جديد من أصحاب الصنائع.
+                </p>
+              </div>
+
+              <Card className="border-2 border-primary/30 shadow-lifted">
+                <CardContent className="p-7">
+                  <div className="mb-4 inline-flex rounded-xl bg-accent p-3 text-primary">
+                    <GraduationCap className="h-6 w-6" />
                   </div>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                    “{t.quote}”
+                  <div className="text-sm font-bold text-primary">أول ورشة لنا</div>
+                  <h3 className="mt-1 text-xl font-extrabold">
+                    ورشة تعليمية في جيجل
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    نظراً لأننا منصة ناشئة، ننطلق بأولى ورشاتنا المجانية نهاية الشهر
+                    المقبل في ولاية جيجل. مفتوحة لكل من يرغب في تعلّم صنعة جديدة.
                   </p>
-                  <div className="mt-5 flex items-center gap-3">
-                    <img
-                      src={t.avatar}
-                      alt={t.name}
-                      className="h-11 w-11 rounded-full object-cover"
-                    />
-                    <div>
-                      <div className="font-bold">{t.name}</div>
-                      <div className="text-xs text-muted-foreground">{t.craft}</div>
-                    </div>
-                  </div>
+                  <p className="mt-5 flex items-center gap-2 text-sm font-bold">
+                    <MapPin className="h-4 w-4 text-primary" />
+                    جيجل، الجزائر — نهاية جويلية
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            </div>
           </div>
         </section>
 
