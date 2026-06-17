@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CalendarDays, Eye, Hammer, MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { formatDZD, getPageBySlug, isPageLive } from "@/lib/store";
+import { formatDZD, getPageBySlug, getSession, isPageLive } from "@/lib/store";
 import type { Page } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,16 @@ import { WhatsAppIcon } from "@/components/public/whatsapp-icon";
 export default function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const [isPreview, setIsPreview] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [page, setPage] = useState<Page | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setIsPreview(new URLSearchParams(window.location.search).get("preview") === "1");
     (async () => {
-      const found = await getPageBySlug(slug);
+      const [found, session] = await Promise.all([getPageBySlug(slug), getSession()]);
       setPage(found);
+      setIsAdmin(session?.role === "admin");
       setLoaded(true);
       if (found) {
         document.title = `${found.businessName}${found.craft ? ` – ${found.craft}` : ""} في ${found.city} | صنعة`;
@@ -55,7 +57,7 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
     );
   }
 
-  if (!page || (!isPageLive(page) && !isPreview)) {
+  if (!page || (!isPageLive(page) && !isPreview && !isAdmin)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <Hammer className="h-12 w-12 text-muted-foreground" />
@@ -72,10 +74,10 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {isPreview && !isPageLive(page) && (
+      {!isPageLive(page) && (isPreview || isAdmin) && (
         <div className="flex items-center justify-center gap-2 bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-900">
           <Eye className="h-4 w-4" />
-          وضع المعاينة — هذه الصفحة غير منشورة للعموم بعد
+          {isPreview ? "وضع المعاينة" : "وضع المشرف"} — هذه الصفحة غير منشورة للعموم بعد
         </div>
       )}
 

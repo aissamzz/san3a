@@ -5,7 +5,9 @@
 //
 // Images are free/openly-licensed photos from Wikimedia Commons and Flickr.
 // Each image is a single direct URL (avatarUrl / coverUrl / gallery[].url) and
-// can be swapped independently.
+// can be swapped independently. Raster photos use Wikimedia's /thumb/ resizer
+// and Flickr's own size-suffixed renditions (vs. the full-resolution
+// originals) to keep page weight small.
 
 import type { Page } from "./types";
 import { SUPPORT_WHATSAPP } from "./config";
@@ -43,7 +45,7 @@ export const DEMO_PAGES: Page[] = [
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/6/62/Carpenter_%2810424%29_-_The_Noun_Project.svg",
     coverUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/8/8c/Paris_-_Carpenter_workshop_-_4944.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Paris_-_Carpenter_workshop_-_4944.jpg/800px-Paris_-_Carpenter_workshop_-_4944.jpg",
     services: [
       { id: "s1", name: "مطبخ خشب على المقاس", startingPrice: 120000 },
       { id: "s2", name: "خزانة ملابس مدمجة", startingPrice: 65000 },
@@ -51,10 +53,10 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "مكتبة أو رفوف حائط", startingPrice: 18000 },
     ],
     gallery: [
-      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/7/73/Paris_-_Carpenter_workshop_-_4951.jpg" },
-      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/9/9b/Paris_-_Carpenter_workshop_-_4965.jpg" },
-      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/0/03/Paris_-_Carpenter_workshop_-_4980.jpg" },
-      { id: "g4", url: "https://live.staticflickr.com/2511/4112389321_fd8dfffd47_b.jpg" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Paris_-_Carpenter_workshop_-_4951.jpg/640px-Paris_-_Carpenter_workshop_-_4951.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paris_-_Carpenter_workshop_-_4965.jpg/640px-Paris_-_Carpenter_workshop_-_4965.jpg" },
+      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Paris_-_Carpenter_workshop_-_4980.jpg/640px-Paris_-_Carpenter_workshop_-_4980.jpg" },
+      { id: "g4", url: "https://live.staticflickr.com/2511/4112389321_fd8dfffd47_z.jpg" },
     ],
     hours: week("08:30", "17:30"),
     activated: true,
@@ -76,7 +78,7 @@ export const DEMO_PAGES: Page[] = [
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/5/5e/Font_Awesome_5_solid_paint-roller.svg",
     coverUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/e/e0/A_home_painter_at_work.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/A_home_painter_at_work.jpg/800px-A_home_painter_at_work.jpg",
     services: [
       { id: "s1", name: "دهن شقة كاملة", startingPrice: 45000 },
       { id: "s2", name: "دهن الغرفة الواحدة", startingPrice: 9000 },
@@ -84,9 +86,9 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "دهن واجهة محل", startingPrice: 30000 },
     ],
     gallery: [
-      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/d/d5/0086_wall_painting.jpg" },
-      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/6/63/Fort_Kochi_-_Wall_Painters_on_ropes.jpg" },
-      { id: "g3", url: "https://live.staticflickr.com/1233/3267421536_3050c57cc3_b.jpg" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/0086_wall_painting.jpg/640px-0086_wall_painting.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Fort_Kochi_-_Wall_Painters_on_ropes.jpg/640px-Fort_Kochi_-_Wall_Painters_on_ropes.jpg" },
+      { id: "g3", url: "https://live.staticflickr.com/1233/3267421536_3050c57cc3_z.jpg" },
       { id: "g4", url: "https://live.staticflickr.com/2111/1813415211_59a7ced74a.jpg" },
     ],
     hours: week("08:00", "18:00"),
@@ -109,7 +111,7 @@ export const DEMO_PAGES: Page[] = [
     avatarUrl:
       "https://upload.wikimedia.org/wikipedia/commons/2/2f/Confectioner%2C_pastry-cook.svg",
     coverUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/1/1b/Algerian_pastries.jpg",
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Algerian_pastries.jpg/800px-Algerian_pastries.jpg",
     services: [
       { id: "s1", name: "صينية حلويات الأعراس (الكيلو)", startingPrice: 2800 },
       { id: "s2", name: "تورتة عيد ميلاد", startingPrice: 4500 },
@@ -117,9 +119,9 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "طلبات خاصة حسب الطلب", startingPrice: 3000 },
     ],
     gallery: [
-      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/f/f8/Tcharek_el_ariane_%28algerian_pastry%29.jpg" },
-      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/7/7d/Algerian_Pastry.JPG" },
-      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/4/40/Makrout_ellouz.jpg" },
+      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Tcharek_el_ariane_%28algerian_pastry%29.jpg/640px-Tcharek_el_ariane_%28algerian_pastry%29.jpg" },
+      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Algerian_Pastry.JPG/640px-Algerian_Pastry.JPG" },
+      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Makrout_ellouz.jpg/640px-Makrout_ellouz.jpg" },
       { id: "g4", url: "https://live.staticflickr.com/7035/6429963321_293fd4a55f.jpg" },
       { id: "g5", url: "https://live.staticflickr.com/3158/5738006754_9f71cc072c.jpg" },
     ],
