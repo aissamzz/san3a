@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SiteHeader } from "@/components/public/site-header";
 import { SiteFooter } from "@/components/public/site-footer";
+import { SupportWhatsAppBubble } from "@/components/public/support-whatsapp-bubble";
 import { WhatsAppIcon } from "@/components/public/whatsapp-icon";
 
 export const metadata: Metadata = {
@@ -396,6 +397,7 @@ export default function LandingPage() {
       </main>
 
       <SiteFooter />
+      <SupportWhatsAppBubble />
     </div>
   );
 }

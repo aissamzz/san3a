@@ -2,16 +2,18 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Eye, Hammer, MapPin, Phone, Share2 } from "lucide-react";
+import { CalendarDays, Eye, Hammer, Home, MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { formatDZD, getPageBySlug, getSession, isPageLive } from "@/lib/store";
+import { isDemoSlug } from "@/lib/demo-pages";
 import type { Page } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookingWidget } from "@/components/public/booking-widget";
 import { Gallery } from "@/components/public/gallery";
+import { SupportWhatsAppBubble } from "@/components/public/support-whatsapp-bubble";
 import { WhatsAppIcon } from "@/components/public/whatsapp-icon";
 
 export default function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -88,6 +90,16 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
           <img src={page.coverUrl} alt="" className="h-full w-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute start-3 top-3 h-10 w-10 bg-card/90 backdrop-blur"
+          asChild
+        >
+          <Link href="/" aria-label="العودة إلى الصفحة الرئيسية">
+            <Home className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12">
@@ -180,29 +192,13 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-5 pb-24 text-center text-sm text-muted-foreground sm:pb-5">
+      <footer className="border-t bg-card py-5 text-center text-sm text-muted-foreground">
         <Link href="/" className="transition-colors hover:text-primary">
           صُنع بواسطة <span className="font-bold">san3apages</span>
         </Link>
       </footer>
 
-      {/* Sticky mobile action bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 p-3 pb-safe backdrop-blur sm:hidden">
-        <div className="flex gap-2">
-          <Button variant="whatsapp" className="flex-1" asChild>
-            <a href="#booking">
-              <WhatsAppIcon className="h-4 w-4" />
-              احجز عبر واتساب
-            </a>
-          </Button>
-          <Button variant="outline" className="flex-1" asChild>
-            <a href={`tel:${page.phone}`}>
-              <Phone className="h-4 w-4" />
-              اتصل الآن
-            </a>
-          </Button>
-        </div>
-      </div>
+      {isDemoSlug(slug) && <SupportWhatsAppBubble />}
     </div>
   );
 }
