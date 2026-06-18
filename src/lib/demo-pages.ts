@@ -32,14 +32,14 @@ const FAR_FUTURE = "2099-12-31";
 
 export const DEMO_PAGES: Page[] = [
   {
-    id: "demo-najjar-mohamed",
+    id: "demo-itqan",
     userId: "demo",
-    slug: "najjar-mohamed",
-    businessName: "ورشة النجار محمد",
+    slug: "it9an-demo",
+    businessName: "ورشة الإتقان",
     craft: "نجّار",
-    city: "الجزائر",
+    city: "قسنطينة",
     description:
-      "نجارة عصرية وكلاسيكية على المقاس: مطابخ، خزائن، أبواب وديكورات خشبية. خبرة تتجاوز خمسة عشر عاماً في خدمة عائلات العاصمة، مع التزام بالمواعيد وجودة التشطيب.",
+      "نجارة عصرية وكلاسيكية على المقاس: مطابخ، خزائن، أبواب وديكورات خشبية. خبرة تتجاوز خمسة عشر عاماً في خدمة عائلات قسنطينة، مع التزام بالمواعيد وجودة التشطيب.",
     phone: PHONE,
     whatsapp: WHATSAPP,
     avatarUrl:

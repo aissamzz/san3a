@@ -88,7 +88,7 @@ const steps = [
 ];
 
 const demoPages = [
-  { slug: "najjar-mohamed", name: "ورشة النجار محمد", craft: "نجّار", city: "الجزائر", icon: Hammer },
+  { slug: "it9an-demo", name: "ورشة الإتقان", craft: "نجّار", city: "قسنطينة", icon: Hammer },
   { slug: "dahane-karim", name: "دهان وديكور كريم", craft: "دهّان", city: "وهران", icon: Paintbrush },
   { slug: "halawiyat-sara", name: "حلويات سارة", craft: "صانعة حلويات", city: "قسنطينة", icon: CakeSlice },
 ];
@@ -198,7 +198,7 @@ export default function LandingPage() {
                 <Link href="/signup">أنشئ صفحتك مجاناً</Link>
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
-                <Link href="/najjar-mohamed">شاهد صفحة تجريبية</Link>
+                <Link href="/it9an-demo">شاهد صفحة تجريبية</Link>
               </Button>
             </div>
             <p
