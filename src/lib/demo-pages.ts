@@ -3,11 +3,13 @@
 // (see getPageBySlug) so the demos work on a fresh install with an empty
 // database. Phone / WhatsApp all point at the platform support number.
 //
-// Images are free/openly-licensed photos from Wikimedia Commons and Flickr.
 // Each image is a single direct URL (avatarUrl / coverUrl / gallery[].url) and
-// can be swapped independently. Raster photos use Wikimedia's /thumb/ resizer
-// and Flickr's own size-suffixed renditions (vs. the full-resolution
-// originals) to keep page weight small.
+// can be swapped independently. it9an-demo uses AI-generated photos shipped
+// locally under public/demos/it9an/ (resized + recompressed). The other two
+// demos use openly-licensed Wikimedia Commons / Flickr photos — raster
+// photos there use Wikimedia's /thumb/ resizer and Flickr's own
+// size-suffixed renditions (vs. full-resolution originals) to keep page
+// weight small.
 
 import type { Page } from "./types";
 import { SUPPORT_WHATSAPP } from "./config";
@@ -42,10 +44,8 @@ export const DEMO_PAGES: Page[] = [
       "نجارة عصرية وكلاسيكية على المقاس: مطابخ، خزائن، أبواب وديكورات خشبية. خبرة تتجاوز خمسة عشر عاماً في خدمة عائلات قسنطينة، مع التزام بالمواعيد وجودة التشطيب.",
     phone: PHONE,
     whatsapp: WHATSAPP,
-    avatarUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/6/62/Carpenter_%2810424%29_-_The_Noun_Project.svg",
-    coverUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Paris_-_Carpenter_workshop_-_4944.jpg/800px-Paris_-_Carpenter_workshop_-_4944.jpg",
+    avatarUrl: "/demos/it9an/logo.png",
+    coverUrl: "/demos/it9an/cover.jpg",
     services: [
       { id: "s1", name: "مطبخ خشب على المقاس", startingPrice: 120000 },
       { id: "s2", name: "خزانة ملابس مدمجة", startingPrice: 65000 },
@@ -53,10 +53,10 @@ export const DEMO_PAGES: Page[] = [
       { id: "s4", name: "مكتبة أو رفوف حائط", startingPrice: 18000 },
     ],
     gallery: [
-      { id: "g1", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Paris_-_Carpenter_workshop_-_4951.jpg/640px-Paris_-_Carpenter_workshop_-_4951.jpg" },
-      { id: "g2", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Paris_-_Carpenter_workshop_-_4965.jpg/640px-Paris_-_Carpenter_workshop_-_4965.jpg" },
-      { id: "g3", url: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Paris_-_Carpenter_workshop_-_4980.jpg/640px-Paris_-_Carpenter_workshop_-_4980.jpg" },
-      { id: "g4", url: "https://live.staticflickr.com/2511/4112389321_fd8dfffd47_z.jpg" },
+      { id: "g1", url: "/demos/it9an/gallery-1.jpg" },
+      { id: "g2", url: "/demos/it9an/gallery-2.jpg" },
+      { id: "g3", url: "/demos/it9an/gallery-3.jpg" },
+      { id: "g4", url: "/demos/it9an/gallery-4.jpg" },
     ],
     hours: week("08:30", "17:30"),
     activated: true,
