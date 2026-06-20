@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Eye, Hammer, Home, MapPin, Phone, Share2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, Eye, Hammer, MapPin, Phone, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { formatDZD, getPageBySlug, getSession, isPageLive } from "@/lib/store";
@@ -90,16 +90,18 @@ export default function PublicPage({ params }: { params: Promise<{ slug: string 
           <img src={page.coverUrl} alt="" className="h-full w-full object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute start-3 top-3 h-10 w-10 bg-card/90 backdrop-blur"
-          asChild
-        >
-          <Link href="/" aria-label="العودة إلى الصفحة الرئيسية">
-            <Home className="h-4 w-4" />
-          </Link>
-        </Button>
+        {isDemoSlug(slug) && (
+          <Button
+            variant="outline"
+            className="absolute end-3 top-3 bg-card/90 backdrop-blur"
+            asChild
+          >
+            <Link href="/">
+              العودة لإنشاء الحساب
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </div>
 
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12">
